@@ -1,0 +1,7 @@
+*.pyc
+__pycache__/
+parts/
+stage/
+prime/
+
+
