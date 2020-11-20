@@ -60,29 +60,61 @@ class CLIConfig:
     def get_outdated_step_action(self):
         return OutdatedStepAction.CLEAN
 
-class Config:
-    #def __init__(self, *, parts, project, validator):
+
+class BuildOptions:
+    """BuildOptions defines the configuration shared with the plugins."""
     def __init__(
         self, *,
-        parts: Dict[str, Any],
-        name: str,
         arch_triplet: str,
         base: str = "",
         is_cross_compiling: bool = False,
-	deb_arch: str = "",
-	kernel_arch: str = "",
         parallel_build_count: int = 1,
+	deb_arch: str = "",
+    ):
+        self._arch_triplet = arch_triplet 
+        self._build_base = base
+        self._is_cross_compiling = is_cross_compiling
+        self._parallel_build_count = parallel_build_count
+        self._deb_arch = deb_arch
+
+        @property
+        def arch_triplet(self):
+            return self._arch_triplet
+
+        @property
+        def build_base(self):
+            return self._build_base
+
+        @property
+        def is_cross_compiling(self):
+            return self._is_cross_compiling
+
+        @property
+        def parallel_build_count(self):
+            return self._parallel_build_count
+
+        @property
+        def deb_arch(self):
+            return self._deb_arch
+
+        
+class PartBuilder:
+    # TODO: also specify part environment replacements
+    def __init__(
+        self, *,
+        parts: Dict[str, Any],
         local_plugins_dir: str = "",
         work_dir: str = "",
         package_repositories: List[str] = [],
-        version: str = ""
+        options: BuildOptions
     ):
-
         self._parts = parts
         self._soname_cache = elf.SonameCache()
         self._parts_data = parts.get("parts", {})
         #self._snap_type = parts.get("type", "app")
         #self._project = project
+
+        self._options = options
 
         # FIXME:SPIKE: deal with managed host
         self._is_managed_host = False
@@ -90,20 +122,12 @@ class Config:
         if work_dir == "":
             work_dir = os.getcwd()
 
-        self._name = name
-        self._arch_triplet = arch_triplet
-        self._build_base = base
-        self._deb_arch = deb_arch
-        self._kernel_arch = kernel_arch
-        self._is_cross_compiling = is_cross_compiling
-        self._parallel_build_count = parallel_build_count
         self._work_dir = work_dir
         self._parts_dir = os.path.join(work_dir, "parts")
         self._stage_dir = os.path.join(work_dir, "stage")
         self._prime_dir = os.path.join(work_dir, "prime")
         self._local_plugins_dir = local_plugins_dir
         self._package_repositories = package_repositories
-        self._version = version
 
         self._validator = Validator(parts)
         self._validator.validate()
@@ -111,7 +135,6 @@ class Config:
         self.all_parts = []
         self._part_names = []
         self.after_requests = {}
-
 
         self._process_parts()
 

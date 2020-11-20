@@ -86,7 +86,7 @@ class PluginV1:
         self.options = options
 
         if config:
-            self.partdir = os.path.join(config._parts_dir, name)
+            self.partdir = os.path.join(config.parts_dir, name)
         else:
             self.partdir = os.path.join(os.getcwd(), "parts", name)
 

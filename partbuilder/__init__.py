@@ -17,3 +17,6 @@
 #from .config import Config
 
 from partbuilder.plugins.v1 import PluginV1 as BasePlugin  # noqa: F401
+
+from ._partbuilder import BuildConfig
+from ._partbuilder import PartBuilder

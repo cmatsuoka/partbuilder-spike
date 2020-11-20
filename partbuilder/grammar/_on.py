@@ -17,8 +17,6 @@
 import re
 from typing import Optional, Set, TYPE_CHECKING
 
-import partbuilder
-
 from .errors import OnStatementSyntaxError
 from . import typing
 from ._statement import Statement

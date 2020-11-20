@@ -47,7 +47,7 @@ def runtime_env(root: str, arch_triplet: str) -> List[str]:
     return env
 
 
-def build_env(root: str, snap_name: str, arch_triplet: str) -> List[str]:
+def build_env(root: str, arch_triplet: str) -> List[str]:
     """Set the environment variables required for building.
 
     This is required for the current parts installdir due to stage-packages
@@ -83,8 +83,8 @@ def build_env(root: str, snap_name: str, arch_triplet: str) -> List[str]:
     return env
 
 
-def build_env_for_stage(stagedir: str, snap_name: str, arch_triplet: str) -> List[str]:
-    env = build_env(stagedir, snap_name, arch_triplet)
+def build_env_for_stage(stagedir: str, arch_triplet: str) -> List[str]:
+    env = build_env(stagedir, arch_triplet)
     env.append('PERL5LIB="{0}/usr/share/perl5/"'.format(stagedir))
 
     return env

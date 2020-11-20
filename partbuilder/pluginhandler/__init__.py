@@ -28,7 +28,6 @@ import sys
 from glob import iglob
 from typing import cast, Dict, List, Optional, Set, Sequence, TYPE_CHECKING
 
-from partbuilder import extractors
 import partbuilder._file_utils as file_utils
 from partbuilder import _file_utils, plugins, yaml_utils
 from partbuilder import common, elf, errors, repo, sources, states, steps, xattrs
@@ -46,9 +45,9 @@ from ._dirty_report import Dependency, DirtyReport  # noqa
 from ._outdated_report import OutdatedReport
 
 
-if TYPE_CHECKING:
+#if TYPE_CHECKING:
 #    from snapcraft.project import Project
-    from snapcraft.config import Config
+#    from snapcraft.config import Config
 
 logger = logging.getLogger(__name__)
 
@@ -63,7 +62,7 @@ class PluginHandler:
         *,
         plugin,
         part_properties,
-        config: "Config",
+        builder,
         part_schema,
         definitions_schema,
         stage_packages_repo,
@@ -85,7 +84,7 @@ class PluginHandler:
             self._source = part_schema["source"].get("default")
 
         # Part specific directories
-        self.part_dir = os.path.join(config._parts_dir, self.name)
+        self.part_dir = os.path.join(builder._config.parts_dir, self.name)
         self.part_source_dir = os.path.join(self.part_dir, "src")
         self.part_build_dir = os.path.join(self.part_dir, "build")
         self.part_install_dir = os.path.join(self.part_dir, "install")
@@ -106,7 +105,7 @@ class PluginHandler:
         self._stage_state: Optional[states.StageState] = None
         self._prime_state: Optional[states.PrimeState] = None
 
-        self._config = config
+        self._builder = builder
         self.deps: List[str] = list()
 
         # We don't need to set the source_handler on systems where we do not
@@ -144,11 +143,11 @@ class PluginHandler:
 
         self._runner = Runner(
             part_properties=self._part_properties,
-            partdir=self._config._parts_dir,
+            partdir=self._builder._parts_dir,
             sourcedir=self.part_source_dir,
             builddir=self.part_build_dir,
-            stagedir=self._config._stage_dir,
-            primedir=self._config._prime_dir,
+            stagedir=self._builder._stage_dir,
+            primedir=self._builder._prime_dir,
             env_generator=env_generator,
             builtin_functions={
                 steps.PULL.name: self._do_pull,
@@ -264,8 +263,8 @@ class PluginHandler:
             self.part_build_dir,
             self.part_install_dir,
             self.part_state_dir,
-            self._config._stage_dir,
-            self._config._prime_dir,
+            self._builder._stage_dir,
+            self._builder._prime_dir,
         ]
         for d in dirs:
             os.makedirs(d, exist_ok=True)
@@ -388,7 +387,7 @@ class PluginHandler:
             # step cares about, and we're comparing it to those same options in
             # the current project. If they've changed, then this step is dirty
             # and needs to run again.
-            options = state.diff_project_options_of_interest(self._config)
+            options = state.diff_project_options_of_interest(self._builder._config)
 
             if properties or options:
                 return DirtyReport(
@@ -451,7 +450,7 @@ class PluginHandler:
             try:
                 self.stage_packages = self._stage_packages_repo.fetch_stage_packages(
                     package_names=stage_packages,
-                    base=self._config._build_base,
+                    base=self._builder._config.build_base,
                     stage_packages_path=self.stage_packages_path,
                 )
             except repo.errors.PackageNotFoundError as e:
@@ -532,7 +531,7 @@ class PluginHandler:
             states.PullState(
                 pull_properties,
                 part_properties=self._part_properties,
-                config=self._config,
+                config=self._builder._config,
                 stage_packages=self.stage_packages,
                 build_snaps=part_build_snaps,
                 build_packages=part_build_packages,
@@ -750,7 +749,7 @@ class PluginHandler:
             states.BuildState(
                 property_names=build_properties,
                 part_properties=self._part_properties,
-                config=self._config,
+                config=self._builder._config,
                 plugin_assets=plugin_manifest,
                 machine_assets=machine_manifest,
                 metadata=metadata,
@@ -854,14 +853,14 @@ class PluginHandler:
             if not file_path.endswith(".pc"):
                 return
             repo.fix_pkg_config(
-                self._config._stage_dir, file_path, self.part_install_dir
+                self._builder._stage_dir, file_path, self.part_install_dir
             )
 
         _migrate_files(
             snap_files,
             snap_dirs,
             self.part_install_dir,
-            self._config._stage_dir,
+            self._builder._stage_dir,
             fixup_func=fixup_func,
         )
         # TODO once `snappy try` is in place we will need to copy
@@ -876,7 +875,7 @@ class PluginHandler:
                 snap_files,
                 snap_dirs,
                 self._part_properties,
-                self._config,
+                self._builder._config,
                 self._scriptlet_metadata[steps.STAGE],
             ),
         )
@@ -889,7 +888,7 @@ class PluginHandler:
 
         try:
             self._clean_shared_area(
-                self._config._stage_dir, state, project_staged_state
+                self._builder._stage_dir, state, project_staged_state
             )
         except AttributeError:
             raise errors.MissingStateCleanError(steps.STAGE)
@@ -907,7 +906,7 @@ class PluginHandler:
     def _get_primed_stage_packages(self, snap_files: Set[str]) -> Set[str]:
         primed_stage_packages: Set[str] = set()
         for snap_file in snap_files:
-            snap_file = os.path.join(self._config._prime_dir, snap_file)
+            snap_file = os.path.join(self._builder._prime_dir, snap_file)
             stage_package = xattrs.read_origin_stage_package(snap_file)
             if stage_package:
                 primed_stage_packages.add(stage_package)
@@ -916,7 +915,7 @@ class PluginHandler:
     def _do_prime(self) -> None:
         snap_files, snap_dirs = self.migratable_fileset_for(steps.PRIME)
         _migrate_files(
-            snap_files, snap_dirs, self._config._stage_dir, self._config._prime_dir
+            snap_files, snap_dirs, self._builder._stage_dir, self._builder._prime_dir
         )
 
         # FIXME:SPIKE: deal with dependency paths
@@ -1031,7 +1030,7 @@ class PluginHandler:
                 snap_dirs,
                 dependency_paths,
                 self._part_properties,
-                self._config,
+                self._builder._config,
                 self._scriptlet_metadata[steps.PRIME],
                 primed_stage_packages,
             ),
@@ -1045,7 +1044,7 @@ class PluginHandler:
 
         try:
             self._clean_shared_area(
-                self._config._prime_dir, state, project_primed_state
+                self._builder._prime_dir, state, project_primed_state
             )
         except AttributeError:
             raise errors.MissingStateCleanError(steps.PRIME)

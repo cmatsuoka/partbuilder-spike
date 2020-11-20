@@ -20,6 +20,10 @@ import logging
 import sys
 from pathlib import Path
 
+from typing import TYPE_CHECKING
+
+#from .._partbuilder import BuildConfig
+
 import jsonschema
 
 #from snapcraft.project import errors as project_errors, Project
@@ -39,14 +43,15 @@ def load_plugin(
     part_schema,
     definitions_schema,
 ) -> plugins.v1.PluginV1:
-    local_plugins_dir = config._local_plugins_dir
+    print(dir(config))
+    local_plugins_dir = config.local_plugins_dir
     if local_plugins_dir is not None:
         plugin_class = _get_local_plugin_class(
             plugin_name=plugin_name, local_plugins_dir=local_plugins_dir
         )
     if plugin_class is None:
         plugin_class = plugins.get_plugin_for_base(
-            plugin_name, build_base=config._build_base
+            plugin_name, build_base=config.build_base
         )
 
     if issubclass(plugin_class, plugins.v2.PluginV2):
@@ -65,7 +70,7 @@ def load_plugin(
         )
         plugin = plugin_class(part_name, options, config)
 
-        if config._is_cross_compiling:
+        if config.is_cross_compiling:
             logger.debug(
                 "Setting {!r} as the compilation target for {!r}".format(
                     config._deb_arch, plugin_name

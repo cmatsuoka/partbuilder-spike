@@ -17,7 +17,7 @@
 import logging
 from typing import Optional, List, Sequence, Set
 
-from partbuilder import config, plugins, _env
+from partbuilder import plugins, _env
 from partbuilder import (
     common,
     errors,
@@ -144,25 +144,25 @@ def execute(
             "specifying parts, or clean the steps you want to run again."
         )
 
-    # FIXME:SPIKE: some information ignored
+    # FIXME:SPIKE: this information is ignored
     return {
-        "name": project_config._name,
-        "version": project_config._version,
+        "name": "", #project_config._name,
+        "version": "", #project_config._version,
         "arch": [], #project_config.data["architectures"],
         "type": "" #project_config.data.get("type", ""),
     }
 
 
-def _replace_in_part(part):
-    for key, value in part.plugin.options.__dict__.items():
-        replacements = _env.environment_to_replacements(
-            get_part_directory_environment(part)
-        )
-
-        value = config.replace_attr(value, replacements)
-        setattr(part.plugin.options, key, value)
-
-    return part
+#def _replace_in_part(part):
+#    for key, value in part.plugin.options.__dict__.items():
+#        replacements = _env.environment_to_replacements(
+#            get_part_directory_environment(part)
+#        )
+#
+#        value = config.replace_attr(value, replacements)
+#        setattr(part.plugin.options, key, value)
+#
+#    return part
 
 
 class _Executor:
@@ -187,14 +187,21 @@ class _Executor:
             processed_part_names = self.config.part_names
 
         # FIXME:SPIKE: find out what cli_config is doing here
-        with config.CLIConfig() as cli_config:
-            for current_step in step.previous_steps() + [step]:
-                if current_step == steps.STAGE:
-                    # XXX check only for collisions on the parts that have
-                    # already been built --elopio - 20170713
-                    pluginhandler.check_for_collisions(self.config.all_parts)
-                for part in parts:
-                    self._handle_step(part_names, part, step, current_step, cli_config)
+        #with CLIConfig() as cli_config:
+        #    for current_step in step.previous_steps() + [step]:
+        #        if current_step == steps.STAGE:
+        #            # XXX check only for collisions on the parts that have
+        #            # already been built --elopio - 20170713
+        #            pluginhandler.check_for_collisions(self.config.all_parts)
+        #        for part in parts:
+        #            self._handle_step(part_names, part, step, current_step, cli_config)
+        for current_step in step.previous_steps() + [step]:
+            if current_step == steps.STAGE:
+                # XXX check only for collisions on the parts that have
+                # already been built --elopio - 20170713
+                pluginhandler.check_for_collisions(self.config.all_parts)
+            for part in parts:
+                self._handle_step(part_names, part, step, current_step, None)
 
         self._create_meta(step, processed_part_names)
 
@@ -325,7 +332,8 @@ class _Executor:
             common.env = self.parts_config.build_env_for_part(part)
             common.env.extend(self.config.project_env())
 
-        part = _replace_in_part(part)
+        # FIXME:SPIKE: handle replacements
+        #part = _replace_in_part(part)
 
     def _run_step(self, *, step: steps.Step, part, progress, hint=""):
         self._prepare_step(step=step, part=part)
