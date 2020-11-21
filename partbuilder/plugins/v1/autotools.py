@@ -122,7 +122,7 @@ class AutotoolsPlugin(make.MakePlugin):
             configure_command.append("--prefix=")
         else:
             configure_command.append("--prefix=" + self.installdir)
-        if self.config._is_cross_compiling:
+        if self.config.is_cross_compiling:
             configure_command.append("--host={}".format(self.project.arch_triplet))
 
         self.run(configure_command + self.options.configflags)

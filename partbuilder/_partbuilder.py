@@ -16,8 +16,8 @@
 
 from collections import ChainMap
 import logging
+import platform
 import os
-import enum
 from os import path
 from typing import List
 from typing import TYPE_CHECKING, cast, Union, Dict, List, Set, Any  # noqa: F401
@@ -39,75 +39,162 @@ from . import errors, grammar_processing
 
 logger = logging.getLogger(__name__)
 
-@enum.unique
-class OutdatedStepAction(enum.Enum):
-    # Would like to use enum.auto(), but it's only available in >= 3.6
-    ERROR = 1
-    CLEAN = 2
+
+_ARCH_TRANSLATIONS = {
+    "aarch64": {
+        "kernel": "arm64",
+        "deb": "arm64",
+        "uts_machine": "aarch64",
+        "cross-compiler-prefix": "aarch64-linux-gnu-",
+        "cross-build-packages": ["gcc-aarch64-linux-gnu", "libc6-dev-arm64-cross"],
+        "triplet": "aarch64-linux-gnu",
+        "core-dynamic-linker": "lib/ld-linux-aarch64.so.1",
+    },
+    "armv7l": {
+        "kernel": "arm",
+        "deb": "armhf",
+        "uts_machine": "arm",
+        "cross-compiler-prefix": "arm-linux-gnueabihf-",
+        "cross-build-packages": ["gcc-arm-linux-gnueabihf", "libc6-dev-armhf-cross"],
+        "triplet": "arm-linux-gnueabihf",
+        "core-dynamic-linker": "lib/ld-linux-armhf.so.3",
+    },
+    "i686": {
+        "kernel": "x86",
+        "deb": "i386",
+        "uts_machine": "i686",
+        "triplet": "i386-linux-gnu",
+    },
+    "ppc": {
+        "kernel": "powerpc",
+        "deb": "powerpc",
+        "uts_machine": "powerpc",
+        "cross-compiler-prefix": "powerpc-linux-gnu-",
+        "cross-build-packages": ["gcc-powerpc-linux-gnu", "libc6-dev-powerpc-cross"],
+        "triplet": "powerpc-linux-gnu",
+    },
+    "ppc64le": {
+        "kernel": "powerpc",
+        "deb": "ppc64el",
+        "uts_machine": "ppc64el",
+        "cross-compiler-prefix": "powerpc64le-linux-gnu-",
+        "cross-build-packages": [
+            "gcc-powerpc64le-linux-gnu",
+            "libc6-dev-ppc64el-cross",
+        ],
+        "triplet": "powerpc64le-linux-gnu",
+        "core-dynamic-linker": "lib64/ld64.so.2",
+    },
+    "riscv64": {
+        "kernel": "riscv64",
+        "deb": "riscv64",
+        "uts_machine": "riscv64",
+        "cross-compiler-prefix": "riscv64-linux-gnu-",
+        "cross-build-packages": ["gcc-riscv64-linux-gnu", "libc6-dev-riscv64-cross"],
+        "triplet": "riscv64-linux-gnu",
+        "core-dynamic-linker": "lib/ld-linux-riscv64-lp64d.so.1",
+    },
+    "s390x": {
+        "kernel": "s390",
+        "deb": "s390x",
+        "uts_machine": "s390x",
+        "cross-compiler-prefix": "s390x-linux-gnu-",
+        "cross-build-packages": ["gcc-s390x-linux-gnu", "libc6-dev-s390x-cross"],
+        "triplet": "s390x-linux-gnu",
+        "core-dynamic-linker": "lib/ld64.so.1",
+    },
+    "x86_64": {
+        "kernel": "x86",
+        "deb": "amd64",
+        "uts_machine": "x86_64",
+        "triplet": "x86_64-linux-gnu",
+        "core-dynamic-linker": "lib64/ld-linux-x86-64.so.2",
+    },
+}
+
+
+
+
 
 
 # FIXME:SPIKE: get rid of cli config
-class CLIConfig:
-    def __init__(self) -> None:
-        pass
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        pass
-
-    def get_outdated_step_action(self):
-        return OutdatedStepAction.CLEAN
+#class CLIConfig:
+#    def __init__(self) -> None:
+#        pass
+#
+#    def __enter__(self):
+#        return self
+#
+#    def __exit__(self, exc_type, exc_val, exc_tb):
+#        pass
+#
+#    def get_outdated_step_action(self):
+#        return OutdatedStepAction.CLEAN
 
 
 class BuildConfig:
-    """BuildOptions defines the configuration shared with the plugins."""
     def __init__(
         self, *,
-        arch_triplet: str,
-        base: str = "",
-        is_cross_compiling: bool = False,
+        target_deb_arch = None,
+        base: str = None,
         is_git_version: bool = False,
         parallel_build_count: int = 1,
         local_plugins_dir: str = "",
-	deb_arch: str = "",
     ):
-        self._arch_triplet = arch_triplet 
+        self._set_machine(target_deb_arch)
+
         self._build_base = base
-        self._is_cross_compiling = is_cross_compiling
         self._is_git_version = is_git_version
         self._parallel_build_count = parallel_build_count
         self._local_plugins_dir = local_plugins_dir
-        self._deb_arch = deb_arch
 
     @property
-    def arch_triplet(self):
-        return self._arch_triplet
+    def arch_triplet(self) -> str:
+        return self.__machine_info["triplet"]
 
     @property
-    def build_base(self):
+    def build_base(self) -> str:
         return self._build_base
 
     @property
-    def is_cross_compiling(self):
-        return self._is_cross_compiling
+    def is_cross_compiling(self) -> bool:
+        return self.__target_machine != self.__platform_arch
 
+    # FIXME:SPIKE: handle this in a better way
     @property
-    def is_git_version(self):
+    def is_git_version(self) -> bool:
         return self._is_git_version
 
     @property
-    def parallel_build_count(self):
+    def parallel_build_count(self) -> int:
         return self._parallel_build_count
 
     @property
-    def local_plugins_dir(self):
+    def local_plugins_dir(self) -> str:
         return self._local_plugins_dir
 
     @property
-    def deb_arch(self):
-        return self._deb_arch
+    def deb_arch(self) -> str:
+        return self.__machine_info["deb"]
+
+    @property
+    def part(self) -> str:
+        return self._part_name
+
+    @property
+    def stage(self) -> str:
+        return self._stage_name
+
+    def _set_machine(self, target_deb_arch):
+        self.__platform_arch = _get_platform_architecture()
+        self.__target_arch = target_deb_arch
+        if not target_deb_arch:
+            self.__target_machine = self.__platform_arch
+        else:
+            self.__target_machine = _find_machine(target_deb_arch)
+            logger.info("Setting target machine to {!r}".format(target_deb_arch))
+        self.__machine_info = _ARCH_TRANSLATIONS[self.__target_machine]
+
 
         
 class PartBuilder:
@@ -115,20 +202,18 @@ class PartBuilder:
     def __init__(
         self, *,
         parts: Dict[str, Any],
-        config: BuildConfig,
         work_dir: str = "",
-        package_repositories: List[str] = []
+        package_repositories: List[str] = [],
+
+        # BuildConfig parameters
+        **kwargs
+
     ):
         self._parts = parts
         self._soname_cache = elf.SonameCache()
         self._parts_data = parts.get("parts", {})
-        #self._snap_type = parts.get("type", "app")
-        #self._project = project
 
-        self._config = config
-
-        # FIXME:SPIKE: deal with managed host
-        self._is_managed_host = False
+        self._config = BuildConfig(**kwargs)
 
         if work_dir == "":
             work_dir = os.getcwd()
@@ -137,10 +222,15 @@ class PartBuilder:
         self._parts_dir = os.path.join(work_dir, "parts")
         self._stage_dir = os.path.join(work_dir, "stage")
         self._prime_dir = os.path.join(work_dir, "prime")
-        self._package_repositories = package_repositories
 
-        # FIXME:SPIKE: needed by PluginV1
+        # FIXME:SPIKE: organize dirs (parts_dir needed by PluginsV1)
         self._config.parts_dir = self._parts_dir
+
+        # FIXME:SPIKE: deal with managed host
+        self._is_managed_host = False
+
+
+        self._package_repositories = package_repositories
 
         self._validator = Validator(parts)
         self._validator.validate()
@@ -467,6 +557,21 @@ class PartBuilder:
         return state
 
 
+def _get_platform_architecture():
+    architecture = platform.machine()
+
+    # FIXME:SPIKE: handle windows case
+    # Translate the windows architectures we know of to architectures
+    # we can work with.
+    #if sys.platform == "win32":
+    #    architecture = _WINDOWS_TRANSLATIONS.get(architecture)
+    #if platform.architecture()[0] == "32bit":
+    #    userspace = _32BIT_USERSPACE_ARCHITECTURE.get(architecture)
+    #    if userspace:
+    #        architecture = userspace
+
+    return architecture
+
 # FIXME:SPIKE: find a better place for this
 def replace_attr(
     attr: Union[List[str], Dict[str, str], str], replacements: Dict[str, str]
@@ -487,4 +592,5 @@ def replace_attr(
         return result
 
     return attr
+
 

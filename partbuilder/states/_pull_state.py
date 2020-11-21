@@ -94,4 +94,4 @@ class PullState(PartState):
         The pull step only cares about the target architecture.
         """
 
-        return {"deb_arch": config._deb_arch}
+        return {"deb_arch": config.deb_arch}

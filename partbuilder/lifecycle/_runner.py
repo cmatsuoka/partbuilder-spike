@@ -15,6 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
+import enum
 from typing import Optional, List, Sequence, Set
 
 from partbuilder import plugins, _env
@@ -32,6 +33,13 @@ from partbuilder.pluginhandler._part_environment import (
 )
 #from snapcraft.internal.meta._snap_packaging import create_snap_packaging
 from ._status_cache import StatusCache
+
+@enum.unique
+class OutdatedStepAction(enum.Enum):
+    # Would like to use enum.auto(), but it's only available in >= 3.6
+    ERROR = 1
+    CLEAN = 2
+
 
 
 logger = logging.getLogger(__name__)
@@ -369,9 +377,9 @@ class _Executor:
             print("SPIKE: skip create_snap_packaging(self.config)")
 
     def _handle_dirty(self, part, step, dirty_report, cli_config):
-        dirty_action = cli_config.get_outdated_step_action()
+        dirty_action = OutdatedStepAction.CLEAN   #cli_config.get_outdated_step_action()
         if not step.clean_if_dirty:
-            if dirty_action == config.OutdatedStepAction.ERROR:
+            if dirty_action == OutdatedStepAction.ERROR:
                 raise errors.StepOutdatedError(
                     step=step, part=part.name, dirty_report=dirty_report
                 )
@@ -381,9 +389,9 @@ class _Executor:
         )
 
     def _handle_outdated(self, part, step, outdated_report, cli_config):
-        dirty_action = cli_config.get_outdated_step_action()
+        dirty_action = OutdatedStepAction.CLEAN  #cli_config.get_outdated_step_action()
         if not step.clean_if_dirty:
-            if dirty_action == config.OutdatedStepAction.ERROR:
+            if dirty_action == OutdatedStepAction.ERROR:
                 raise errors.StepOutdatedError(
                     step=step, part=part.name, outdated_report=outdated_report
                 )

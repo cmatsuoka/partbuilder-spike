@@ -143,7 +143,7 @@ class PluginHandler:
 
         self._runner = Runner(
             part_properties=self._part_properties,
-            partdir=self._builder._parts_dir,
+            partdir=self._builder._config.parts_dir,
             sourcedir=self.part_source_dir,
             builddir=self.part_build_dir,
             stagedir=self._builder._stage_dir,
