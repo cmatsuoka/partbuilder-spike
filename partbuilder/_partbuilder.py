@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from collections import ChainMap
+from collections import ChainMap, defaultdict
 import logging
 import platform
 import os
@@ -113,28 +113,14 @@ _ARCH_TRANSLATIONS = {
 }
 
 
-
-
-
-
-# FIXME:SPIKE: get rid of cli config
-#class CLIConfig:
-#    def __init__(self) -> None:
-#        pass
-#
-#    def __enter__(self):
-#        return self
-#
-#    def __exit__(self, exc_type, exc_val, exc_tb):
-#        pass
-#
-#    def get_outdated_step_action(self):
-#        return OutdatedStepAction.CLEAN
+_pre_hooks = defaultdict(list)
+_post_hooks = defaultdict(list)
 
 
 class BuildConfig:
     def __init__(
         self, *,
+        work_dir: str = "",
         target_deb_arch = None,
         base: str = None,
         is_git_version: bool = False,
@@ -147,6 +133,17 @@ class BuildConfig:
         self._is_git_version = is_git_version
         self._parallel_build_count = parallel_build_count
         self._local_plugins_dir = local_plugins_dir
+
+        self.part = ""   # part name to be filled before calling the hook
+        self.step = ""   # step name to be filled before calling the hook
+
+        if work_dir == "":
+            work_dir = os.getcwd()
+
+        self._work_dir = work_dir
+        self._parts_dir = os.path.join(work_dir, "parts")
+        self._stage_dir = os.path.join(work_dir, "stage")
+        self._prime_dir = os.path.join(work_dir, "prime")
 
     @property
     def arch_triplet(self) -> str:
@@ -178,12 +175,16 @@ class BuildConfig:
         return self.__machine_info["deb"]
 
     @property
-    def part(self) -> str:
-        return self._part_name
+    def parts_dir(self) -> str:
+        return self._parts_dir
 
     @property
-    def stage(self) -> str:
-        return self._stage_name
+    def stage_dir(self) -> str:
+        return self._stage_dir
+
+    @property
+    def prime_dir(self) -> str:
+        return self._prime_dir
 
     def _set_machine(self, target_deb_arch):
         self.__platform_arch = _get_platform_architecture()
@@ -202,7 +203,6 @@ class PartBuilder:
     def __init__(
         self, *,
         parts: Dict[str, Any],
-        work_dir: str = "",
         package_repositories: List[str] = [],
 
         # BuildConfig parameters
@@ -213,22 +213,11 @@ class PartBuilder:
         self._soname_cache = elf.SonameCache()
         self._parts_data = parts.get("parts", {})
 
+
         self._config = BuildConfig(**kwargs)
-
-        if work_dir == "":
-            work_dir = os.getcwd()
-
-        self._work_dir = work_dir
-        self._parts_dir = os.path.join(work_dir, "parts")
-        self._stage_dir = os.path.join(work_dir, "stage")
-        self._prime_dir = os.path.join(work_dir, "prime")
-
-        # FIXME:SPIKE: organize dirs (parts_dir needed by PluginsV1)
-        self._config.parts_dir = self._parts_dir
 
         # FIXME:SPIKE: deal with managed host
         self._is_managed_host = False
-
 
         self._package_repositories = package_repositories
 
@@ -253,19 +242,19 @@ class PartBuilder:
     #    return packages
 
     def clean(self):
-        lifecycle.execute(steps.CLEAN, self)
+        lifecycle.execute(steps.CLEAN, self, _pre_hooks, _post_hooks)
 
     def pull(self):
-        lifecycle.execute(steps.PULL, self)
+        lifecycle.execute(steps.PULL, self, _pre_hooks, _post_hooks)
 
     def build(self):
-        lifecycle.execute(steps.BUILD, self)
+        lifecycle.execute(steps.BUILD, self, _pre_hooks, _post_hooks)
 
     def stage(self):
-        lifecycle.execute(steps.STAGE, self)
+        lifecycle.execute(steps.STAGE, self, _pre_hooks, _post_hooks)
 
     def prime(self):
-        lifecycle.execute(steps.PRIME, self)
+        lifecycle.execute(steps.PRIME, self, _pre_hooks, _post_hooks)
 
     def _process_parts(self):
         for part_name in self._parts_data:
@@ -433,7 +422,7 @@ class PartBuilder:
         """Return a build env of all the part's dependencies."""
 
         env = []  # type: List[str]
-        stagedir = self._stage_dir
+        stagedir = self._config.stage_dir
 
         if root_part:
             # this has to come before any {}/usr/bin
@@ -536,7 +525,7 @@ class PartBuilder:
         if self._is_managed_host:
             state_file_path = os.path.join(self._work_dir, "state")
         else:
-            state_file_path = os.path.join(self._parts_dir, ".snapcraft_global_state")
+            state_file_path = os.path.join(self._config.parts_dir, ".snapcraft_global_state")
 
         return state_file_path
 
@@ -555,6 +544,41 @@ class PartBuilder:
             state[part.name] = states.get_state(part.part_state_dir, step)
 
         return state
+
+  
+# decorators
+
+def pre_pull(func):
+    _pre_hooks[steps.PULL.name].append(func)
+    return func
+
+def post_pull(func):
+    _post_hooks[steps.PULL.name].append(func)
+    return func
+
+def pre_build(func):
+    _pre_hooks[steps.BUILD.name].append(func)
+    return func
+
+def post_build(func):
+    _post_hooks[steps.BUILD.name].append(func)
+    return func
+
+def pre_stage(func):
+    _pre_hooks[steps.STAGE.name].append(func)
+    return func
+
+def post_stage(func):
+    _post_hooks[steps.STAGE.name].append(func)
+    return func
+
+def pre_prime(func):
+    _pre_hooks[steps.PRIME.name].append(func)
+    return func
+
+def post_prime(func):
+    _post_hooks[steps.PRIME.name].append(func)
+    return func
 
 
 def _get_platform_architecture():

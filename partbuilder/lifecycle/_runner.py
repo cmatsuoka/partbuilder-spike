@@ -99,7 +99,9 @@ def _install_build_snaps(build_snaps: Set[str], content_snaps: Set[str]) -> List
 
 def execute(
     step: steps.Step,
-    project_config: "project_loader._config.Config",
+    builder,
+    pre_hooks = [],
+    post_hooks = [],
     part_names: Sequence[str] = None,
 ):
     """Execute until step in the lifecycle for part_names or all parts.
@@ -121,14 +123,14 @@ def execute(
                           over.
     :returns: A dict with the snap name, version, type and architectures.
     """
-    installed_packages = _install_build_packages(project_config.get_build_packages())
+    installed_packages = _install_build_packages(builder.get_build_packages())
     installed_snaps = _install_build_snaps(
-        project_config.get_build_snaps(), project_config.get_content_snaps()
+        builder.get_build_snaps(), builder.get_content_snaps()
     )
 
     try:
         global_state = states.GlobalState.load(
-            filepath=project_config._get_global_state_file_path()
+            filepath=builder._get_global_state_file_path()
         )
     except FileNotFoundError:
         global_state = states.GlobalState()
@@ -138,13 +140,13 @@ def execute(
     if global_state.get_required_grade() is None:
         global_state.set_required_grade(
             _get_required_grade(
-                base=project_config._build_base,
-                arch=project_config._deb_arch,
+                base=builder._config.build_base,
+                arch=builder._config.deb_arch,
             )
         )
-    global_state.save(filepath=project_config._get_global_state_file_path())
+    global_state.save(filepath=builder._get_global_state_file_path())
 
-    executor = _Executor(project_config)
+    executor = _Executor(builder, pre_hooks, post_hooks)
     executor.run(step, part_names)
     if not executor.steps_were_run:
         logger.warning(
@@ -174,25 +176,25 @@ def execute(
 
 
 class _Executor:
-    def __init__(self, project_config):
-        self.config = project_config
-        self.project = project_config #.project
-        self.parts_config = project_config #.parts
+    def __init__(self, builder, pre_hooks, post_hooks):
+        self.builder = builder
         self.steps_were_run = False
+        self._pre_hooks = pre_hooks
+        self._post_hooks = post_hooks
 
-        self._cache = StatusCache(project_config)
+        self._cache = StatusCache(builder)
 
     def run(self, step: steps.Step, part_names=None):
         print("SPIKE: executor run: step={}, part_names={}".format(step, part_names))
         if part_names:
-            self.parts_config.validate(part_names)
+            self.builder.validate(part_names)
             # self.config.all_parts is already ordered, let's not lose that
             # and keep using a list.
-            parts = [p for p in self.config.all_parts if p.name in part_names]
+            parts = [p for p in self.builder.all_parts if p.name in part_names]
             processed_part_names = part_names
         else:
-            parts = self.config.all_parts
-            processed_part_names = self.config.part_names
+            parts = self.builder.all_parts
+            processed_part_names = self.builder.part_names
 
         # FIXME:SPIKE: find out what cli_config is doing here
         #with CLIConfig() as cli_config:
@@ -207,7 +209,7 @@ class _Executor:
             if current_step == steps.STAGE:
                 # XXX check only for collisions on the parts that have
                 # already been built --elopio - 20170713
-                pluginhandler.check_for_collisions(self.config.all_parts)
+                pluginhandler.check_for_collisions(self.builder.all_parts)
             for part in parts:
                 self._handle_step(part_names, part, step, current_step, None)
 
@@ -223,7 +225,10 @@ class _Executor:
     ) -> None:
         # If this step hasn't yet run, all we need to do is run it
         if not self._cache.has_step_run(part, current_step):
+            print("SPIKE: _run_{}, hooks={}".format(current_step.name, self._pre_hooks[current_step.name]))
+            self._run_hooks(self._pre_hooks, step=current_step, part=part)
             getattr(self, "_run_{}".format(current_step.name))(part)
+            self._run_hooks(self._post_hooks, step=current_step, part=part)
             return
 
         # Alright, this step has already run. In that case, a few different
@@ -308,7 +313,7 @@ class _Executor:
 
     def _prepare_step(self, *, step: steps.Step, part: pluginhandler.PluginHandler):
         common.reset_env()
-        all_dependencies = self.parts_config.get_dependencies(part.name)
+        all_dependencies = self.builder.get_dependencies(part.name)
 
         # Filter dependencies down to only those that need to run the
         # prerequisite step
@@ -337,8 +342,8 @@ class _Executor:
             preparation_function()
 
         if isinstance(part.plugin, plugins.v1.PluginV1):
-            common.env = self.parts_config.build_env_for_part(part)
-            common.env.extend(self.config.project_env())
+            common.env = self.builder.build_env_for_part(part)
+            common.env.extend(self.builder.project_env())
 
         # FIXME:SPIKE: handle replacements
         #part = _replace_in_part(part)
@@ -359,8 +364,8 @@ class _Executor:
         self.steps_were_run = True
 
     def _rerun_step(self, *, step: steps.Step, part, progress, hint=""):
-        staged_state = self.config.get_project_state(steps.STAGE)
-        primed_state = self.config.get_project_state(steps.PRIME)
+        staged_state = self.builder.get_project_state(steps.STAGE)
+        primed_state = self.builder.get_project_state(steps.PRIME)
 
         # First clean the step, then run it again
         part.clean(staged_state, primed_state, step)
@@ -373,8 +378,8 @@ class _Executor:
         self._run_step(step=step, part=part, progress=progress, hint=hint)
 
     def _create_meta(self, step: steps.Step, part_names: Sequence[str]) -> None:
-        if step == steps.PRIME and part_names == self.config.part_names:
-            print("SPIKE: skip create_snap_packaging(self.config)")
+        if step == steps.PRIME and part_names == self.builder.part_names:
+            print("SPIKE: skip create_snap_packaging(self.builder)")
 
     def _handle_dirty(self, part, step, dirty_report, cli_config):
         dirty_action = OutdatedStepAction.CLEAN   #cli_config.get_outdated_step_action()
@@ -413,6 +418,13 @@ class _Executor:
             getattr(self, "_re{}".format(step.name))(
                 part, "({})".format(outdated_report.get_summary())
             )
+
+    def _run_hooks(self, hooks, step, part):
+        self.builder._config.part = part.name
+        self.builder._config.step = step.name
+        self.builder._config.part_build_dir = part.part_build_dir
+        for hook in hooks[step.name]:
+            hook(self.builder._config)
 
 
 def notify_part_progress(part, progress, hint="", debug=False):

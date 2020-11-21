@@ -146,8 +146,8 @@ class PluginHandler:
             partdir=self._builder._config.parts_dir,
             sourcedir=self.part_source_dir,
             builddir=self.part_build_dir,
-            stagedir=self._builder._stage_dir,
-            primedir=self._builder._prime_dir,
+            stagedir=self._builder._config.stage_dir,
+            primedir=self._builder._config.prime_dir,
             env_generator=env_generator,
             builtin_functions={
                 steps.PULL.name: self._do_pull,
@@ -263,8 +263,8 @@ class PluginHandler:
             self.part_build_dir,
             self.part_install_dir,
             self.part_state_dir,
-            self._builder._stage_dir,
-            self._builder._prime_dir,
+            self._builder._config.stage_dir,
+            self._builder._config.prime_dir,
         ]
         for d in dirs:
             os.makedirs(d, exist_ok=True)
@@ -853,14 +853,14 @@ class PluginHandler:
             if not file_path.endswith(".pc"):
                 return
             repo.fix_pkg_config(
-                self._builder._stage_dir, file_path, self.part_install_dir
+                self._builder._config.stage_dir, file_path, self.part_install_dir
             )
 
         _migrate_files(
             snap_files,
             snap_dirs,
             self.part_install_dir,
-            self._builder._stage_dir,
+            self._builder._config.stage_dir,
             fixup_func=fixup_func,
         )
         # TODO once `snappy try` is in place we will need to copy
@@ -906,7 +906,7 @@ class PluginHandler:
     def _get_primed_stage_packages(self, snap_files: Set[str]) -> Set[str]:
         primed_stage_packages: Set[str] = set()
         for snap_file in snap_files:
-            snap_file = os.path.join(self._builder._prime_dir, snap_file)
+            snap_file = os.path.join(self._builder._config.prime_dir, snap_file)
             stage_package = xattrs.read_origin_stage_package(snap_file)
             if stage_package:
                 primed_stage_packages.add(stage_package)
@@ -915,7 +915,7 @@ class PluginHandler:
     def _do_prime(self) -> None:
         snap_files, snap_dirs = self.migratable_fileset_for(steps.PRIME)
         _migrate_files(
-            snap_files, snap_dirs, self._builder._stage_dir, self._builder._prime_dir
+            snap_files, snap_dirs, self._builder._config.stage_dir, self._builder._config.prime_dir
         )
 
         # FIXME:SPIKE: deal with dependency paths
