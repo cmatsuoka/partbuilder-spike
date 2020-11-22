@@ -43,7 +43,6 @@ def load_plugin(
     part_schema,
     definitions_schema,
 ) -> plugins.v1.PluginV1:
-    print(dir(config))
     local_plugins_dir = config.local_plugins_dir
     if local_plugins_dir is not None:
         plugin_class = _get_local_plugin_class(

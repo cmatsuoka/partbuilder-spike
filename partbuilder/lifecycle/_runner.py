@@ -225,7 +225,7 @@ class _Executor:
     ) -> None:
         # If this step hasn't yet run, all we need to do is run it
         if not self._cache.has_step_run(part, current_step):
-            print("SPIKE: _run_{}, hooks={}".format(current_step.name, self._pre_hooks[current_step.name]))
+            print("SPIKE: _run_{}".format(current_step.name))
             self._run_hooks(self._pre_hooks, step=current_step, part=part)
             getattr(self, "_run_{}".format(current_step.name))(part)
             self._run_hooks(self._post_hooks, step=current_step, part=part)
@@ -426,7 +426,7 @@ class _Executor:
         self.builder._config.part_install_dir = part.part_install_dir
         self.builder._config.part_state_dir = part.part_state_dir
         self.builder._config.part_snaps_dir = part.part_snaps_dir
-        for hook in hooks[step.name]:
+        for hook in hooks:
             hook(self.builder._config)
 
 

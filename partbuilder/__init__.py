@@ -22,7 +22,5 @@ from ._partbuilder import BuildConfig
 from ._partbuilder import PartBuilder
 
 # decorators
-from ._partbuilder import pre_pull, post_pull
-from ._partbuilder import pre_build, post_build
-from ._partbuilder import pre_stage, post_stage
-from ._partbuilder import pre_prime, post_prime
+from ._partbuilder import pre_step
+from ._partbuilder import post_step

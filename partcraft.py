@@ -20,9 +20,9 @@ def run(name, version, file_name):
     builder.prime()
 
 
-@partbuilder.pre_build
+@partbuilder.pre_step
 def set_part_environment(config: partbuilder.BuildConfig):
-    # mimick the part environment set by snapcraft
+    # mimic the part environment set by snapcraft
     env = {
         "SNAPCRAFT_ARCH_TRIPLET": config.arch_triplet,
         "SNAPCRAFT_PARALLEL_BUILD_COUNT": str(config.parallel_build_count),

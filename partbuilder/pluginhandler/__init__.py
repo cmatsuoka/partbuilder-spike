@@ -888,7 +888,7 @@ class PluginHandler:
 
         try:
             self._clean_shared_area(
-                self._builder._stage_dir, state, project_staged_state
+                self._builder._config.stage_dir, state, project_staged_state
             )
         except AttributeError:
             raise errors.MissingStateCleanError(steps.STAGE)
@@ -1044,7 +1044,7 @@ class PluginHandler:
 
         try:
             self._clean_shared_area(
-                self._builder._prime_dir, state, project_primed_state
+                self._builder._config.prime_dir, state, project_primed_state
             )
         except AttributeError:
             raise errors.MissingStateCleanError(steps.PRIME)

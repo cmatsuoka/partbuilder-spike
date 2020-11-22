@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from collections import ChainMap, defaultdict
+from collections import ChainMap
 import logging
 import platform
 import os
@@ -113,8 +113,8 @@ _ARCH_TRANSLATIONS = {
 }
 
 
-_pre_hooks = defaultdict(list)
-_post_hooks = defaultdict(list)
+_pre_hooks = []
+_post_hooks = []
 
 
 class BuildConfig:
@@ -536,37 +536,15 @@ class PartBuilder:
   
 # decorators
 
-def pre_pull(func):
-    _pre_hooks[steps.PULL.name].append(func)
+def pre_step(func):
+    _pre_hooks.append(func)
     return func
 
-def post_pull(func):
-    _post_hooks[steps.PULL.name].append(func)
+def post_step(func):
+    _post_hooks.append(func)
     return func
 
-def pre_build(func):
-    _pre_hooks[steps.BUILD.name].append(func)
-    return func
 
-def post_build(func):
-    _post_hooks[steps.BUILD.name].append(func)
-    return func
-
-def pre_stage(func):
-    _pre_hooks[steps.STAGE.name].append(func)
-    return func
-
-def post_stage(func):
-    _post_hooks[steps.STAGE.name].append(func)
-    return func
-
-def pre_prime(func):
-    _pre_hooks[steps.PRIME.name].append(func)
-    return func
-
-def post_prime(func):
-    _post_hooks[steps.PRIME.name].append(func)
-    return func
 
 
 def _get_platform_architecture():

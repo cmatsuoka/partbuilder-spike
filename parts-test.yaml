@@ -1,0 +1,18 @@
+parts:
+    part1:
+        plugin: nil
+        after: [part2]
+        override-build: |
+            echo "-------------------------------"
+            echo "build dir: ${SNAPCRAFT_PART_BUILD}"
+            echo "-------------------------------"
+    part2:
+        plugin: nil
+        override-pull: |
+            echo "-------------------------------"
+            echo "project name: ${SNAPCRAFT_PROJECT_NAME}"
+            echo "version: ${SNAPCRAFT_PROJECT_VERSION}"
+            echo "arch triplet: ${SNAPCRAFT_ARCH_TRIPLET}"
+            echo "-------------------------------"
+
+        

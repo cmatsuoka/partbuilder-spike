@@ -85,8 +85,6 @@ class PluginV1:
         self.config = config
         self.options = options
 
-        print("SPIKE: parts_dir={}".format(config.parts_dir))
-
         if config:
             self.partdir = os.path.join(config.parts_dir, name)
         else:
