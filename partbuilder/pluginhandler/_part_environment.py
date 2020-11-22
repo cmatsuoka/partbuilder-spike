@@ -65,8 +65,8 @@ def get_global_environment(
     #    grade = ""
 
     return {
-        "SNAPCRAFT_ARCH_TRIPLET": config.arch_triplet,
-        "SNAPCRAFT_PARALLEL_BUILD_COUNT": str(config.parallel_build_count),
+        #"SNAPCRAFT_ARCH_TRIPLET": config.arch_triplet,
+        #"SNAPCRAFT_PARALLEL_BUILD_COUNT": str(config.parallel_build_count),
         #"SNAPCRAFT_PROJECT_NAME": config._name,
         #"SNAPCRAFT_PROJECT_VERSION": config._version,
         #"SNAPCRAFT_PROJECT_DIR": config._project_dir,

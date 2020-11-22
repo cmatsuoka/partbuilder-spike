@@ -89,10 +89,11 @@ class MakePlugin(PluginV1):
     def __init__(self, name, options, config):
         super().__init__(name, options, config)
 
-        if config._build_base not in ("core", "core16", "core18", "core20"):
-            raise errors.PluginBaseError(
-                part_name=self.name, base=config._build_base
-            )
+        # FIXME:SPIKE: move this test to a common location
+        #if config.build_base not in ("core", "core16", "core18", "core20"):
+        #    raise errors.PluginBaseError(
+        #        part_name=self.name, base=config._build_base
+        #    )
 
         self.build_packages.append("make")
 

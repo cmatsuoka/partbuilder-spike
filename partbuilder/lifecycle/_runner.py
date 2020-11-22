@@ -163,16 +163,16 @@ def execute(
     }
 
 
-#def _replace_in_part(part):
-#    for key, value in part.plugin.options.__dict__.items():
-#        replacements = _env.environment_to_replacements(
-#            get_part_directory_environment(part)
-#        )
-#
-#        value = config.replace_attr(value, replacements)
-#        setattr(part.plugin.options, key, value)
-#
-#    return part
+def _replace_in_part(part):
+    for key, value in part.plugin.options.__dict__.items():
+        replacements = _env.environment_to_replacements(
+            get_part_directory_environment(part)
+        )
+
+        value = config.replace_attr(value, replacements)
+        setattr(part.plugin.options, key, value)
+
+    return part
 
 
 class _Executor:
@@ -423,6 +423,9 @@ class _Executor:
         self.builder._config.part = part.name
         self.builder._config.step = step.name
         self.builder._config.part_build_dir = part.part_build_dir
+        self.builder._config.part_install_dir = part.part_install_dir
+        self.builder._config.part_state_dir = part.part_state_dir
+        self.builder._config.part_snaps_dir = part.part_snaps_dir
         for hook in hooks[step.name]:
             hook(self.builder._config)
 

@@ -1,0 +1,21 @@
+parts:
+  mpg123:
+    plugin: autotools
+    source: https://sourceforge.net/projects/mpg123/files/mpg123/1.26.3/mpg123-1.26.3.tar.bz2
+    configflags:
+      - --prefix=
+      - --with-default-audio=pulse
+      - --enable-network=yes
+      - --enable-ipv6=yes
+    build-packages:
+      - build-essential
+      - libpulse-dev
+      - libasound-dev
+    stage-packages:
+      - libpulse0
+      - libasound2
+    prime:
+      - -usr/share/doc
+      - -usr/share/man
+      - -usr/share/lintian
+      - -include

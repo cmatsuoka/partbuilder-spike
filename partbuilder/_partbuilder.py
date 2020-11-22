@@ -126,10 +126,11 @@ class BuildConfig:
         is_git_version: bool = False,
         parallel_build_count: int = 1,
         local_plugins_dir: str = "",
+        **xargs
     ):
         self._set_machine(target_deb_arch)
 
-        self._build_base = base
+        self.build_base = base
         self._is_git_version = is_git_version
         self._parallel_build_count = parallel_build_count
         self._local_plugins_dir = local_plugins_dir
@@ -140,18 +141,17 @@ class BuildConfig:
         if work_dir == "":
             work_dir = os.getcwd()
 
-        self._work_dir = work_dir
-        self._parts_dir = os.path.join(work_dir, "parts")
-        self._stage_dir = os.path.join(work_dir, "stage")
-        self._prime_dir = os.path.join(work_dir, "prime")
+        self.work_dir = work_dir
+        self.parts_dir = os.path.join(work_dir, "parts")
+        self.stage_dir = os.path.join(work_dir, "stage")
+        self.prime_dir = os.path.join(work_dir, "prime")
+
+        for key, value in xargs.items():
+            setattr(self, key, value)
 
     @property
     def arch_triplet(self) -> str:
         return self.__machine_info["triplet"]
-
-    @property
-    def build_base(self) -> str:
-        return self._build_base
 
     @property
     def is_cross_compiling(self) -> bool:
@@ -173,18 +173,6 @@ class BuildConfig:
     @property
     def deb_arch(self) -> str:
         return self.__machine_info["deb"]
-
-    @property
-    def parts_dir(self) -> str:
-        return self._parts_dir
-
-    @property
-    def stage_dir(self) -> str:
-        return self._stage_dir
-
-    @property
-    def prime_dir(self) -> str:
-        return self._prime_dir
 
     def _set_machine(self, target_deb_arch):
         self.__platform_arch = _get_platform_architecture()
