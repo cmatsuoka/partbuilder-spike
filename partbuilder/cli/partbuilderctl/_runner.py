@@ -20,77 +20,14 @@ import logging
 import os
 import sys
 
-import click
-
-from partbuilder.cli._errors import exception_handler
-from partbuilder import errors, log
+from partbuilder import errors
 
 
-@click.group()
-@click.option("--debug", "-d", is_flag=True, envvar="SNAPCRAFT_ENABLE_DEVELOPER_DEBUG")
-def run(debug):
+def run(cmd:str, prog_name:str="partcraftctl"):
     """snapcraftctl is how snapcraft.yaml can communicate with snapcraft"""
 
-    if debug:
-        log_level = logging.DEBUG
-    else:
-        log_level = logging.INFO
-
-    # Setup global exception handler (to be called for unhandled exceptions)
-    sys.excepthook = functools.partial(exception_handler, debug=debug)
-
-    # In an ideal world, this logger setup would be replaced
-    log.configure(log_level=log_level)
-
-
-@run.command()
-def pull():
-    """Run the 'pull' step of the calling part's lifecycle"""
-    _call_function("pull")
-
-
-@run.command()
-def build():
-    """Run the 'build' step of the calling part's lifecycle"""
-    _call_function("build")
-
-
-@run.command()
-def stage():
-    """Run the 'stage' step of the calling part's lifecycle"""
-    _call_function("stage")
-
-
-@run.command()
-def prime():
-    """Run the 'prime' step of the calling part's lifecycle"""
-    _call_function("prime")
-
-
-def validate_version(ctx, param, value):
-    if not value:
-        raise click.BadParameter(f"Version must be a non-empty string.")
-    return value
-
-
-@run.command("set-version")
-@click.argument("version", callback=validate_version)
-def set_version(version):
-    """Set the version of the snap"""
-    _call_function("set-version", {"version": version})
-
-
-def validate_grade(ctx, param, value):
-    if value not in ["stable", "devel"]:
-        raise click.BadParameter(f"Grade must be 'stable' or 'devel'.")
-    return value
-
-
-@run.command("set-grade")
-@click.argument("grade", callback=validate_grade)
-def set_grade(grade):
-    """Set the grade of the snap"""
-    _call_function("set-grade", {"grade": grade})
+    if cmd in ["pull", "build", "stage", "prime"]:
+        _call_function(cmd)
 
 
 def _call_function(function_name, args=None):
@@ -104,12 +41,12 @@ def _call_function(function_name, args=None):
     # here allows one to run e.g. `snapcraftctl build --help` without needing
     # these variables defined, which is a win for usability.
     try:
-        call_fifo = os.environ["SNAPCRAFTCTL_CALL_FIFO"]
-        feedback_fifo = os.environ["SNAPCRAFTCTL_FEEDBACK_FIFO"]
+        call_fifo = os.environ["PARTBUILDERCTL_CALL_FIFO"]
+        feedback_fifo = os.environ["PARTBUILDERCTL_FEEDBACK_FIFO"]
     except KeyError as e:
-        raise errors.SnapcraftEnvironmentError(
+        raise errors.PartbuilderEnvironmentError(
             "{!s} environment variable must be defined. Note that this "
-            "utility is only designed for use within a snapcraft.yaml".format(e)
+            "utility is only designed for use during part building".format(e)
         ) from e
 
     with open(call_fifo, "w") as f:

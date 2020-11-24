@@ -126,9 +126,9 @@ class Runner:
             # means snapcraftctl won't be found. We can't use aliases since they don't
             # persist into subshells. However, we know that snapcraftctl lives in its own
             # directory, so adding that to the PATH should have no ill side effects.
-            snapcraftctl_env = 'export PATH="$PATH:$SNAP/bin/scriptlet-bin"'
+            partbuilderctl_env = 'export PATH="$PATH:$SNAP/bin/scriptlet-bin"'
         else:
-            snapcraftctl_env = ""
+            partbuilderctl_env = ""
 
         with tempfile.TemporaryDirectory(dir=self._partdir) as tempdir:
             call_fifo = _NonBlockingRWFifo(os.path.join(tempdir, "function_call"))
@@ -140,10 +140,10 @@ class Runner:
             script = textwrap.dedent(
                 """\
                 set -e
-                export SNAPCRAFTCTL_CALL_FIFO={call_fifo}
-                export SNAPCRAFTCTL_FEEDBACK_FIFO={feedback_fifo}
-                export SNAPCRAFT_INTERPRETER={interpreter}
-                {snapcraftctl_env}
+                export PARTBUILDERCTL_CALL_FIFO={call_fifo}
+                export PARTBUILDERCTL_FEEDBACK_FIFO={feedback_fifo}
+                export PARTBUIDLER_INTERPRETER={interpreter}
+                {partbuilderctl_env}
 
                 {env}
 
@@ -153,7 +153,7 @@ class Runner:
                 call_fifo=call_fifo.path,
                 feedback_fifo=feedback_fifo.path,
                 scriptlet=scriptlet,
-                snapcraftctl_env=snapcraftctl_env,
+                partbuilderctl_env=partbuilderctl_env,
                 env=self._env_generator(step),
             )
 
