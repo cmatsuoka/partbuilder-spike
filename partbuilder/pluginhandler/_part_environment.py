@@ -21,7 +21,7 @@ from partbuilder import common
 from partbuilder import steps
 
 if TYPE_CHECKING:
-    from partbuilder.config import Config
+    from partbuilder import BuildConfig
     from . import PluginHandler
 
 
@@ -120,7 +120,7 @@ def get_part_environment(
 
     include_paths = list()
     for path in paths:
-        include_paths.extend(common.get_include_paths(path, part._config._arch_triplet))
+        include_paths.extend(common.get_include_paths(path, part._config.arch_triplet))
 
     if include_paths:
         for envvar in ["CPPFLAGS", "CFLAGS", "CXXFLAGS"]:
@@ -130,14 +130,14 @@ def get_part_environment(
 
     library_paths = list()
     for path in paths:
-        library_paths.extend(common.get_library_paths(path, part._config._arch_triplet))
+        library_paths.extend(common.get_library_paths(path, part._config.arch_triplet))
 
     if library_paths:
         part_environment["LDFLAGS"] = formatting_utils.combine_paths(
             paths=library_paths, prepend="-L", separator=" "
         )
 
-    pkg_config_paths = common.get_pkg_config_paths(path, part._project.arch_triplet)
+    pkg_config_paths = common.get_pkg_config_paths(path, part._config.arch_triplet)
     if pkg_config_paths:
         part_environment["PKG_CONFIG_PATH"] = formatting_utils.combine_paths(
             pkg_config_paths, prepend="", separator=":"

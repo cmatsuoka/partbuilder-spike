@@ -392,7 +392,7 @@ class PartBuilder:
         part = pluginhandler.PluginHandler(
             plugin=plugin,
             part_properties=part_properties,
-            #project=self._project,
+            config=self._config,
             builder=self, # pass this config instead of project
             part_schema=self._validator.part_schema,
             definitions_schema=self._validator.definitions_schema,

@@ -63,6 +63,7 @@ class PluginHandler:
         plugin,
         part_properties,
         builder,
+        config,
         part_schema,
         definitions_schema,
         stage_packages_repo,
@@ -76,6 +77,7 @@ class PluginHandler:
         self.stage_packages: List[str] = list()
         self._stage_packages_repo = stage_packages_repo
         self._grammar_processor = grammar_processor
+        self._config = config
         # FIXME:SPIKE: this will be used by patchelf
         #self._snap_base_path = snap_base_path
         self._soname_cache = soname_cache

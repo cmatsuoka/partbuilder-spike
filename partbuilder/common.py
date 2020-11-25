@@ -17,6 +17,7 @@
 # Data/methods shared between plugins and snapcraft
 
 import os
+import pathlib
 import logging
 import urllib
 import subprocess
@@ -169,6 +170,20 @@ def is_snap() -> bool:
 def is_process_container() -> bool:
     logger.debug("snapcraft is running in a docker or podman (OCI) container")
     return any([os.path.exists(p) for p in (_DOCKERENV_FILE, _PODMAN_FILE)])
+
+
+# FIXME:SPIKE: should these go in something like os_utils
+
+def get_bin_paths(*, root: Union[str, pathlib.Path], existing_only=True) -> List[str]:
+    paths = (os.path.join("usr", "sbin"), os.path.join("usr", "bin"), "sbin", "bin")
+    rooted_paths = (os.path.join(root, p) for p in paths)
+
+    if existing_only:
+        return [p for p in rooted_paths if os.path.exists(p)]
+    else:
+        return list(rooted_paths)
+
+
 
 def get_include_paths(root, arch_triplet):
     paths = [

@@ -11,7 +11,7 @@ def run(name, version, file_name):
     # TODO: change explicit base spec with plugin v1/v2 control?
     builder = partbuilder.PartBuilder(
         parts=parts,
-        base="core18",
+        base="core20",
         this_project_name=name,
         this_project_grade="whatever",
         this_project_version=version,
@@ -44,5 +44,5 @@ def set_part_environment(config: partbuilder.BuildConfig):
 
 
 if __name__ == "__main__":
-    run("mpg123", "1.26.3", "parts-mpg123.yaml")
+    run("mpg123", "1.26.3", "parts-mpg123-v2.yaml")
 
