@@ -31,6 +31,11 @@ import jsonschema
 from partbuilder import errors
 from partbuilder import plugins
 
+_custom_plugins = {}
+
+def _get_custom_plugin_class(plugin_name: str):
+    return _custom_plugins.get(plugin_name)
+
 
 logger = logging.getLogger(__name__)
 
@@ -48,6 +53,10 @@ def load_plugin(
         plugin_class = _get_local_plugin_class(
             plugin_name=plugin_name, local_plugins_dir=local_plugins_dir
         )
+
+    if plugin_class is None:
+        plugin_class = _get_custom_plugin_class(plugin_name)
+
     if plugin_class is None:
         plugin_class = plugins.get_plugin_for_base(
             plugin_name, build_base=config.build_base

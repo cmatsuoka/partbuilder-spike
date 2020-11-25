@@ -21,6 +21,10 @@ from partbuilder.plugins.v1 import PluginV1 as BasePlugin  # noqa: F401
 from ._partbuilder import BuildConfig
 from ._partbuilder import PartBuilder
 
+from .plugins.v1 import PluginV1
+from .plugins.v2 import PluginV2
+
 # decorators
 from ._partbuilder import pre_step
 from ._partbuilder import post_step
+from ._partbuilder import plugin

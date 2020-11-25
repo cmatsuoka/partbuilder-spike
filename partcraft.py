@@ -4,6 +4,8 @@ import partbuilder
 import yaml
 import os
 
+from partbuilder import PluginV1
+
 def run(name, version, file_name):
     with open(file_name) as f:
         parts = yaml.safe_load(f)
@@ -11,7 +13,7 @@ def run(name, version, file_name):
     # TODO: change explicit base spec with plugin v1/v2 control?
     builder = partbuilder.PartBuilder(
         parts=parts,
-        base="core20",
+        base="core18",
         this_project_name=name,
         this_project_grade="whatever",
         this_project_version=version,
@@ -43,6 +45,31 @@ def set_part_environment(config: partbuilder.BuildConfig):
         os.environ[key] = value
 
 
+@partbuilder.plugin(name="custom")
+class CustomPlugin(PluginV1):
+    @classmethod
+    def schema(cls):
+        schema = super().schema()
+        schema["properties"]["message"] = {"type": "string"}
+        schema["required"] = ["message"]
+        return schema
+
+    @classmethod
+    def get_build_properties(cls):
+        # Inform Snapcraft of the properties associated with building. If these
+        # change in the YAML Snapcraft will consider the build step dirty.
+        return ["message"]
+
+    def __init__(self, name, options, config):
+        super().__init__(name, options, config)
+        self.build_packages.append("figlet")
+
+    def build(self):
+        super().build()
+        command = ["figlet", self.options.message]
+        self.run(command)
+
+
 if __name__ == "__main__":
-    run("mpg123", "1.26.3", "parts-mpg123-v2.yaml")
+    run("mpg123", "1.26.3", "parts-mpg123.yaml")
 

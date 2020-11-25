@@ -37,6 +37,8 @@ from partbuilder.package_repository import PackageRepository
 from ._env import build_env, build_env_for_stage, runtime_env
 from . import errors, grammar_processing
 
+from partbuilder.pluginhandler._plugin_loader import _custom_plugins
+
 logger = logging.getLogger(__name__)
 
 
@@ -543,6 +545,11 @@ def pre_step(func):
 def post_step(func):
     _post_hooks.append(func)
     return func
+
+def plugin(name:str):
+    def decorate(class_):
+        _custom_plugins.update({name: class_})
+    return decorate
 
 
 

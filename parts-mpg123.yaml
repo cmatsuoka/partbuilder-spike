@@ -2,6 +2,7 @@ parts:
   mpg123:
     plugin: autotools
     source: https://sourceforge.net/projects/mpg123/files/mpg123/1.26.3/mpg123-1.26.3.tar.bz2
+    after: [banner]
     configflags:
       - --prefix=
       - --with-default-audio=pulse
@@ -19,3 +20,7 @@ parts:
       - -usr/share/man
       - -usr/share/lintian
       - -include
+
+  banner:
+    plugin: custom
+    message: "Building..."
