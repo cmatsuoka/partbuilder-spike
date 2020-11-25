@@ -3,8 +3,9 @@
 import partbuilder
 import yaml
 import os
+from typing import Dict, List, Set
 
-from partbuilder import PluginV1
+from partbuilder import PluginV1, PluginV2
 
 def run(name, version, file_name):
     with open(file_name) as f:
@@ -13,7 +14,7 @@ def run(name, version, file_name):
     # TODO: change explicit base spec with plugin v1/v2 control?
     builder = partbuilder.PartBuilder(
         parts=parts,
-        base="core18",
+        base="core20",
         this_project_name=name,
         this_project_grade="whatever",
         this_project_version=version,
@@ -46,7 +47,7 @@ def set_part_environment(config: partbuilder.BuildConfig):
 
 
 @partbuilder.plugin(name="custom")
-class CustomPlugin(PluginV1):
+class CustomPluginV2(PluginV1):
     @classmethod
     def schema(cls):
         schema = super().schema()
@@ -66,10 +67,35 @@ class CustomPlugin(PluginV1):
 
     def build(self):
         super().build()
-        command = ["figlet", self.options.message]
+        command = ["figlet", "-f", "small", self.options.message]
         self.run(command)
+
+@partbuilder.plugin(name="customv2")
+class CustomPluginV2(PluginV2):
+    @classmethod
+    def get_schema(cls):
+        return {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "type": "object",
+            "additionalProperties": False,
+            "properties": {
+                "message": {"type": "string"},
+            },
+        }
+
+    def get_build_packages(self) -> Set[str]:
+        return {"toilet", "toilet-fonts"}
+
+    def get_build_snaps(self) -> Set[str]:
+        return set()
+
+    def get_build_environment(self) -> Dict[str, str]:
+        return dict()
+
+    def get_build_commands(self) -> List[str]:
+        return ["toilet -f smblock --metal '{}'".format(self.options.message)]
 
 
 if __name__ == "__main__":
-    run("mpg123", "1.26.3", "parts-mpg123.yaml")
+    run("mpg123", "1.26.3", "parts-mpg123-v2.yaml")
 

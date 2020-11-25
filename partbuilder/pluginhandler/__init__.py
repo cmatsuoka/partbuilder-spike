@@ -682,7 +682,7 @@ class PluginHandler:
                 [build_script_path], check=True, cwd=self.part_build_work_dir
             )
         except subprocess.CalledProcessError as process_error:
-            raise errors.SnapcraftPluginBuildError(
+            raise errors.PartbuilderPluginBuildError(
                 part_name=self.name
             ) from process_error
 

@@ -28,6 +28,8 @@ import tempfile
 from pathlib import Path
 from typing import Callable, List, Union
 
+from partbuilder import errors
+
 #_DEFAULT_SCHEMADIR = os.path.join(sys.prefix, "share", "snapcraft", "schema")
 _DEFAULT_SCHEMADIR = os.path.join("/home", "ubuntu", "partbuilder", "schema")
 _schemadir = _DEFAULT_SCHEMADIR
@@ -107,7 +109,7 @@ def _run(cmd: List[str], runner: Callable, **kwargs):
         logger.debug(f"Executing assembled script: {runner_command_string!r}")
         return runner(runner_command, **kwargs)
     except subprocess.CalledProcessError as call_error:
-        raise errors.SnapcraftCommandError(
+        raise errors.PartbuilderCommandError(
             command=cmd_string, call_error=call_error
         ) from call_error
 

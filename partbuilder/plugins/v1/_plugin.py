@@ -187,7 +187,7 @@ class PluginV1:
         try:
             return common.run(cmd, cwd=cwd, **kwargs)
         except CalledProcessError as process_error:
-            raise errors.SnapcraftPluginCommandError(
+            raise errors.PartbuilderPluginCommandError(
                 command=cmd, part_name=self.name, exit_code=process_error.returncode
             ) from process_error
 

@@ -19,3 +19,7 @@ parts:
       - -usr/share/man
       - -usr/share/lintian
       - -include
+
+  banner:
+    plugin: customv2
+    message: Building (v2)...

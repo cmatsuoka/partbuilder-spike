@@ -219,6 +219,27 @@ class PluginBaseError(PartbuilderError):
         super().__init__(part_name=part_name, base=base)
 
 
+class PartbuilderCommandError(PartbuilderError, CalledProcessError):
+    """Exception for generic command errors.
+
+    Processes should capture this error for specific messaging.
+    This exception carries the signature of CalledProcessError for backwards
+    compatibility.
+    """
+
+    fmt = "Failed to run {command!r}: Exited with code {exit_code}."
+
+    def __init__(self, *, command: str, call_error: CalledProcessError) -> None:
+        super().__init__(command=command, exit_code=call_error.returncode)
+        CalledProcessError.__init__(
+            self,
+            returncode=call_error.returncode,
+            cmd=call_error.cmd,
+            output=call_error.output,
+            stderr=call_error.stderr,
+        )
+
+
 class PartbuilderPluginCommandError(PartbuilderError):
     """Command executed by a plugin fails."""
 
@@ -234,6 +255,20 @@ class PartbuilderPluginCommandError(PartbuilderError):
         if isinstance(command, list):
             command = " ".join([shlex.quote(c) for c in command])
         super().__init__(command=command, part_name=part_name, exit_code=exit_code)
+
+
+class PartbuilderPluginBuildError(PartbuilderException):
+    """An exception to raise when the PluginV2 build fails at runtime."""
+
+    def __init__(self, *, part_name: str) -> None:
+        self._part_name = part_name
+
+    def get_brief(self) -> str:
+        return f"Failed to build {self._part_name!r}."
+
+    def get_resolution(self) -> str:
+        return "Check the build logs and ensure the part's configuration and sources are correct."
+
 
 
 
