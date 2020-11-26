@@ -14,16 +14,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import functools
 import json
-import logging
 import os
 import sys
 
 from partbuilder import errors
 
 
-def run(cmd:str, prog_name:str="partcraftctl"):
+def run(cmd: str, prog_name: str = "partcraftctl"):
     """snapcraftctl is how snapcraft.yaml can communicate with snapcraft"""
 
     if cmd in ["pull", "build", "stage", "prime"]:

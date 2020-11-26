@@ -22,10 +22,10 @@ from ._plugin import PluginV1  # noqa: F401
 if sys.platform == "linux":
     from .ant import AntPlugin  # noqa: F401
     from .autotools import AutotoolsPlugin  # noqa: F401
-    #from .catkin import CatkinPlugin  # noqa: F401
-    #from .catkin_tools import CatkinToolsPlugin  # noqa: F401
+    # from .catkin import CatkinPlugin  # noqa: F401
+    # from .catkin_tools import CatkinToolsPlugin  # noqa: F401
     from .cmake import CMakePlugin  # noqa: F401
-    #from .colcon import ColconPlugin  # noqa: F401
+    # from .colcon import ColconPlugin  # noqa: F401
     from .conda import CondaPlugin  # noqa: F401
     from .crystal import CrystalPlugin  # noqa: F401
     from .dotnet import DotNetPlugin  # noqa: F401
@@ -35,7 +35,7 @@ if sys.platform == "linux":
     from .godeps import GodepsPlugin  # noqa: F401
     from .gradle import GradlePlugin  # noqa: F401
     from .kbuild import KBuildPlugin  # noqa: F401
-    #from .kernel import KernelPlugin  # noqa: F401
+    # from .kernel import KernelPlugin  # noqa: F401
     from .make import MakePlugin  # noqa: F401
     from .maven import MavenPlugin  # noqa: F401
     from .meson import MesonPlugin  # noqa: F401

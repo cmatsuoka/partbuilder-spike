@@ -30,7 +30,8 @@ from typing import Callable, List, Union
 
 from partbuilder import errors
 
-#_DEFAULT_SCHEMADIR = os.path.join(sys.prefix, "share", "snapcraft", "schema")
+# FIXME:SPIKE: fix schema dir
+# _DEFAULT_SCHEMADIR = os.path.join(sys.prefix, "share", "partbuilder", "schema")
 _DEFAULT_SCHEMADIR = os.path.join("/home", "ubuntu", "partbuilder", "schema")
 _schemadir = _DEFAULT_SCHEMADIR
 
@@ -44,6 +45,7 @@ env = []  # type: List[str]
 
 def assemble_env():
     return "\n".join(["export " + e for e in env])
+
 
 run_number: int = 0
 
@@ -145,6 +147,7 @@ def get_library_paths(root, arch_triplet, existing_only=True):
 
     return paths
 
+
 def get_url_scheme(url):
     return urllib.parse.urlparse(url).scheme
 
@@ -152,12 +155,15 @@ def get_url_scheme(url):
 def isurl(url):
     return get_url_scheme(url) != ""
 
+
 def reset_env():
     global env
     env = []
 
+
 def get_schemadir():
     return _schemadir
+
 
 # FIXME:SPIKE: is_snap is snapcraft-specific
 def is_snap() -> bool:
@@ -168,6 +174,7 @@ def is_snap() -> bool:
         "SNAP_NAME set to {!r}".format(is_snap, snap_name)
     )
     return is_snap
+
 
 def is_process_container() -> bool:
     logger.debug("snapcraft is running in a docker or podman (OCI) container")
@@ -184,7 +191,6 @@ def get_bin_paths(*, root: Union[str, pathlib.Path], existing_only=True) -> List
         return [p for p in rooted_paths if os.path.exists(p)]
     else:
         return list(rooted_paths)
-
 
 
 def get_include_paths(root, arch_triplet):
@@ -211,4 +217,3 @@ def get_pkg_config_paths(root, arch_triplet):
     ]
 
     return [p for p in paths if os.path.exists(p)]
-

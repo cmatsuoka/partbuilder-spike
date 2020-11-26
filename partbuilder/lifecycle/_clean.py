@@ -19,15 +19,15 @@ import os
 import shutil
 from typing import Optional, TYPE_CHECKING
 
-from partbuilder import formatting_utils
 from partbuilder import errors, mountinfo, steps   # project_loader, mountinfo, steps
+from partbuilder.utils import formatting_utils
 
 
 logger = logging.getLogger(__name__)
 
 
 if TYPE_CHECKING:
-    from partbuilder.config import Config
+    from partbuilder import BuildConfig
 
 
 def _clean_part(part_name, step, config, staged_state, primed_state):
@@ -91,7 +91,7 @@ def _remove_directory_if_empty(directory):
         os.rmdir(directory)
 
 
-def _cleanup_common_directories(config, project: "Project") -> None:
+def _cleanup_common_directories(config: "BuildConfig") -> None:
     max_step = None
     for part in config.all_parts:
         with contextlib.suppress(errors.NoLatestStepError):
@@ -101,10 +101,10 @@ def _cleanup_common_directories(config, project: "Project") -> None:
 
     next_step = steps.next_step(max_step)
     if next_step:
-        _cleanup_common_directories_for_step(next_step, project)
+        _cleanup_common_directories_for_step(next_step, config)
 
 
-def _cleanup_common_directories_for_step(step, project: "Project", parts=None):
+def _cleanup_common_directories_for_step(step, config: "BuildConfig", parts=None):
     if not parts:
         parts = []
 
@@ -116,7 +116,7 @@ def _cleanup_common_directories_for_step(step, project: "Project", parts=None):
         # bind-mounted somewhere.
         mounts = mountinfo.MountInfo()
         try:
-            mounts.for_root(project.prime_dir)
+            mounts.for_root(config.prime_dir)
         except errors.RootNotMountedError:
             remove_dir = True
             message = "Cleaning up priming area"
@@ -131,27 +131,27 @@ def _cleanup_common_directories_for_step(step, project: "Project", parts=None):
             # It does not matter if prime is being tried inside the managed-host
             # or not, we cannot delete prime as it is really a mount from the
             # outside host.
-            if project._is_managed_host:
+            if config._is_managed_host:
                 remove_dir = False
                 message = None
         _cleanup_common(
-            project.prime_dir, steps.PRIME, message, parts, remove_dir=remove_dir
+            config.prime_dir, steps.PRIME, message, parts, remove_dir=remove_dir
         )
 
     if step <= steps.STAGE:
         # Remove the staging area.
         _cleanup_common(
-            project.stage_dir, steps.STAGE, "Cleaning up staging area", parts
+            config.stage_dir, steps.STAGE, "Cleaning up staging area", parts
         )
 
     if step <= steps.PULL:
         # Remove the parts directory (but leave local plugins alone).
-        _cleanup_parts_dir(project.parts_dir, project.local_plugins_dir, parts)
+        _cleanup_parts_dir(config.parts_dir, config.local_plugins_dir, parts)
 
-    if not being_tried and not project._is_managed_host:
-        _remove_directory_if_empty(project.prime_dir)
-    _remove_directory_if_empty(project.stage_dir)
-    _remove_directory_if_empty(project.parts_dir)
+    if not being_tried and not config._is_managed_host:
+        _remove_directory_if_empty(config.prime_dir)
+    _remove_directory_if_empty(config.stage_dir)
+    _remove_directory_if_empty(config.parts_dir)
 
 
 def _cleanup_common(directory, step, message, parts, *, remove_dir=True):
@@ -186,23 +186,21 @@ def _cleanup_parts_dir(parts_dir, local_plugins_dir, parts):
         part.mark_cleaned(steps.PULL)
 
 
-def clean(config: "Config", parts, step=None):
+def clean(config: "BuildConfig", parts, step=None):
     # step defaults to None because that's how it comes from docopt when it's
     # not set.
     if not step:
         step = steps.PULL
 
     if not parts and step == steps.PULL:
-        _cleanup_common_directories_for_step(step, project)
+        _cleanup_common_directories_for_step(step, config)
         return
-
-    #config = project_loader.load_config(project)
 
     if not parts and step <= steps.PRIME:
         # If we've been asked to clean stage or prime without being given
         # specific parts, just blow away those directories instead of
         # doing it per part (it would just be a waste of time).
-        _cleanup_common_directories_for_step(step, project, parts=config.all_parts)
+        _cleanup_common_directories_for_step(step, config, parts=config.all_parts)
 
         # No need to continue if that's all that was required
         if step >= steps.STAGE:
@@ -218,4 +216,4 @@ def clean(config: "Config", parts, step=None):
 
     _clean_parts(parts, step, config, staged_state, primed_state)
 
-    _cleanup_common_directories(config, project)
+    _cleanup_common_directories(config)

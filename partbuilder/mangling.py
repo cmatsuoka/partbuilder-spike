@@ -18,8 +18,8 @@ import re
 import subprocess
 from typing import FrozenSet
 
-from partbuilder import _file_utils as file_utils
 from partbuilder import elf
+from partbuilder.utils import file_utils
 
 
 logger = logging.getLogger(__name__)

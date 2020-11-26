@@ -19,7 +19,7 @@ import os
 from xdg import BaseDirectory
 
 
-class SnapcraftCache:
+class PartbuilderCache:
     """Generic cache base class.
 
     This class is responsible for cache location, notification and pruning.
@@ -29,7 +29,8 @@ class SnapcraftCache:
         self.cache_root = os.path.join(BaseDirectory.xdg_cache_home, "snapcraft")
 
 
-class SnapcraftProjectCache(SnapcraftCache):
+# FIXME:SPIKE: does a project cache make sense?
+class PartbuilderProjectCache(PartbuilderCache):
     """Project specific cache"""
 
     def __init__(self, *, project_name):
@@ -39,7 +40,7 @@ class SnapcraftProjectCache(SnapcraftCache):
         )
 
 
-class SnapcraftStagePackageCache(SnapcraftCache):
+class PartbuilderStagePackageCache(PartbuilderCache):
     """Cache specific to stage-packages."""
 
     def __init__(self):

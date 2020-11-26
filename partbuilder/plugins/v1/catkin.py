@@ -83,13 +83,13 @@ import tempfile
 import textwrap
 from typing import TYPE_CHECKING, List, Set
 
-from partbuilder import _file_utils, formatting_utils
 from partbuilder import common, errors, mangling, os_release, repo
 from partbuilder.package_repository import (
     PackageRepository,
     PackageRepositoryApt,
 )
 from partbuilder.plugins.v1 import PluginV1, _python, _ros
+from partbuilder.utils import file_utils, formatting_utils
 
 if TYPE_CHECKING:
     from snapcraft.project import Project

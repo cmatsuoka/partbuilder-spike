@@ -74,5 +74,3 @@ def humanize_list(
         humanized += ","
 
     return "{} {} {}".format(humanized, conjunction, quoted_items[-1])
-
-

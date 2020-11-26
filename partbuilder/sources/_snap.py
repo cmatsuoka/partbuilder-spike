@@ -20,7 +20,7 @@ import tempfile
 
 from . import errors
 from ._base import FileBase
-from partbuilder import _file_utils, yaml_utils
+from partbuilder.utils import file_utils, yaml_utils
 
 
 class Snap(FileBase):

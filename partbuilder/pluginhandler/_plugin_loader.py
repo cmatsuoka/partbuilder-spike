@@ -22,16 +22,16 @@ from pathlib import Path
 
 from typing import TYPE_CHECKING
 
-#from .._partbuilder import BuildConfig
-
 import jsonschema
 
-#from snapcraft.project import errors as project_errors, Project
-#from partbuilder import Config
 from partbuilder import errors
 from partbuilder import plugins
 
+#if TYPE_CHECKING:
+#    from Partbuilder import BuildConfig
+
 _custom_plugins = {}
+
 
 def _get_custom_plugin_class(plugin_name: str):
     return _custom_plugins.get(plugin_name)
@@ -43,11 +43,11 @@ logger = logging.getLogger(__name__)
 def load_plugin(
     plugin_name: str,
     part_name: str,
-    config,
+    config: "BuildConfig",
     properties,
     part_schema,
     definitions_schema,
-) -> plugins.v1.PluginV1:
+):  # -> plugins.v1.PluginV1:
     local_plugins_dir = config.local_plugins_dir
     if local_plugins_dir is not None:
         plugin_class = _get_local_plugin_class(

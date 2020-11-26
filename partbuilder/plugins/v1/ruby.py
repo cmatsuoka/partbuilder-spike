@@ -36,10 +36,10 @@ import logging
 import os
 import re
 
-from partbuilder import _file_utils
 from partbuilder import errors
 from partbuilder.sources import Tar
 from partbuilder.plugins.v1 import PluginV1
+from partbuilder.utils import file_utils
 
 logger = logging.getLogger(__name__)
 

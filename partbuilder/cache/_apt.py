@@ -17,12 +17,12 @@
 import logging
 import os
 
-from ._cache import SnapcraftStagePackageCache
+from ._cache import PartbuilderStagePackageCache
 
 logger = logging.getLogger(__name__)
 
 
-class AptStagePackageCache(SnapcraftStagePackageCache):
+class AptStagePackageCache(PartbuilderStagePackageCache):
     """Cache for stage-packages coming from apt."""
 
     def __init__(self, *, sources_digest):

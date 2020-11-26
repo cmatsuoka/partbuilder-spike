@@ -16,65 +16,12 @@
 
 from typing import Dict, Optional, TYPE_CHECKING
 
-from partbuilder import formatting_utils
-from partbuilder import common
-from partbuilder import steps
+from partbuilder import common, steps
+from partbuilder.utils import formatting_utils
 
 if TYPE_CHECKING:
     from partbuilder import BuildConfig
     from . import PluginHandler
-
-
-# FIXME:SPIKE: fix global environment settings
-def get_global_environment(
-    config: "Config", include_prime: bool = True
-) -> Dict[str, str]:
-    """
-    Return a global environment for a part.
-
-    include_prime defaults to True for behaviour not to change when using
-    core and core18 bases.
-
-    :param Project project: the Snapcraft project instance.
-    :param bool include_prime: whether to include the prime directory in
-                               the results.
-    :returns: a dictionary with environment variables to apply.
-    :rtype: dict
-    """
-    # The triple check is mostly for unit tests support until we completely
-    # get rid of project.info.
-    #if project._snap_meta.name:
-    #    name = project._snap_meta.name
-    #elif project.info is not None and project.info.name:
-    #    name = project.info.name
-    #else:
-    #    name = ""
-
-    #if project._snap_meta.version:
-    #    version = project._snap_meta.version
-    #elif project.info is not None and project.info.version:
-    #    version = project.info.version
-    #else:
-    #    version = ""
-
-    #if project._snap_meta.grade:
-    #    grade = project._snap_meta.grade
-    #elif project.info is not None and project.info.grade:
-    #    grade = project.info.grade
-    #else:
-    #    grade = ""
-
-    return {
-        #"SNAPCRAFT_ARCH_TRIPLET": config.arch_triplet,
-        #"SNAPCRAFT_PARALLEL_BUILD_COUNT": str(config.parallel_build_count),
-        #"SNAPCRAFT_PROJECT_NAME": config._name,
-        #"SNAPCRAFT_PROJECT_VERSION": config._version,
-        #"SNAPCRAFT_PROJECT_DIR": config._project_dir,
-        #"SNAPCRAFT_PROJECT_GRADE": config._grade,
-        #"SNAPCRAFT_STAGE": config.stage_dir,
-        #"SNAPCRAFT_PRIME": config.prime_dir,
-        #"SNAPCRAFT_EXTENSIONS_DIR": common.get_extensionsdir(),
-    }
 
 
 def get_part_directory_environment(
@@ -101,10 +48,7 @@ def get_part_environment(
     part: "PluginHandler", *, step: steps.Step
 ) -> Dict[str, str]:
     """Return Snapcraft provided part environment."""
-    part_environment = get_global_environment(
-        part._config, include_prime=step == steps.PRIME
-    )
-    part_environment.update(get_part_directory_environment(part, step=step))
+    part_environment = get_part_directory_environment(part, step=step)
 
     paths = [part.part_install_dir, part._config.stage_dir]
 

@@ -18,13 +18,13 @@ import os
 import shutil
 from typing import Optional
 
-from partbuilder._file_utils import calculate_hash
-from ._cache import SnapcraftCache
+from ._cache import PartbuilderCache
+from partbuilder.utils import file_utils
 
 logger = logging.getLogger(__name__)
 
 
-class FileCache(SnapcraftCache):
+class FileCache(PartbuilderCache):
     """Generic file cache."""
 
     def __init__(self, *, namespace: str = "files") -> None:
@@ -45,7 +45,7 @@ class FileCache(SnapcraftCache):
         :returns: path to cached file.
         """
         # First we verify
-        calculated_hash = calculate_hash(filename, algorithm=algorithm)
+        calculated_hash = file_utils.calculate_hash(filename, algorithm=algorithm)
         if calculated_hash != hash:
             logger.warning(
                 "Skipping caching of {!r} as the expected "

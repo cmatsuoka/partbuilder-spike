@@ -30,10 +30,9 @@ import gnupg
 from typing_extensions import Final
 from xdg import BaseDirectory
 
-from partbuilder._file_utils import link_or_copy, link_or_copy_tree
-from partbuilder import os_release
 from partbuilder.indicators import is_dumb_terminal
-#from snapcraft.project._project_options import ProjectOptions
+from partbuilder.utils import file_utils
+#from .._partbuilder import os_release, BuildConfig
 
 from . import apt_ppa, errors
 from ._base import BaseRepo, get_pkg_name_parts
@@ -201,7 +200,7 @@ def _run_dpkg_query_list_files(package_name: str) -> Set[str]:
 
 
 def _get_host_arch() -> str:
-    return ProjectOptions().deb_arch
+    return BuildConfig().deb_arch
 
 
 def _get_dpkg_list_path(base: str) -> pathlib.Path:
@@ -430,7 +429,7 @@ class Ubuntu(BaseRepo):
             ):
                 logger.debug(f"Extracting stage package: {pkg_name}")
                 installed.add(f"{pkg_name}={pkg_version}")
-                link_or_copy(
+                file_utils.link_or_copy(
                     str(dl_path), str(stage_packages_path / dl_path.name)
                 )
 
@@ -448,7 +447,7 @@ class Ubuntu(BaseRepo):
                 marked_name = cls._extract_deb_name_version(pkg_path)
                 cls._mark_origin_stage_package(extract_dir, marked_name)
                 # Stage files to install_dir.
-                link_or_copy_tree(extract_dir, install_path.as_posix())
+                file_utils.link_or_copy_tree(extract_dir, install_path.as_posix())
         cls.normalize(str(install_path))
 
     @classmethod

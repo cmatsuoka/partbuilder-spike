@@ -1,1 +1,1 @@
-from ._runner import run
+from ._runner import run  # noqa: F401

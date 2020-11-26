@@ -51,8 +51,8 @@ from typing import List, Optional
 
 import toml
 
+from partbuilder.utils import file_utils
 from partbuilder import sources
-from partbuilder import _file_utils
 from partbuilder import errors
 from partbuilder.plugins.v1 import PluginV1
 

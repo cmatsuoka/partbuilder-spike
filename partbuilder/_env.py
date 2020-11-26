@@ -16,8 +16,8 @@
 
 from typing import Dict, List
 
-from partbuilder import formatting_utils
 from partbuilder import common, elf
+from partbuilder.utils import formatting_utils
 
 
 def runtime_env(root: str, arch_triplet: str) -> List[str]:

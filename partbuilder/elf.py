@@ -18,9 +18,7 @@ import glob
 import logging
 import os
 import re
-import shutil
 import subprocess
-import tempfile
 from typing import Dict, FrozenSet, List, Optional, Sequence, Set, Tuple, Union
 
 import elftools.common.exceptions
@@ -28,8 +26,7 @@ import elftools.elf.elffile
 from elftools.construct import ConstructError
 from pkg_resources import parse_version
 
-from partbuilder import _file_utils
-from partbuilder import common, errors, repo
+from partbuilder import common, errors
 
 logger = logging.getLogger(__name__)
 
@@ -547,4 +544,3 @@ def get_elf_files(root: str, file_list: Sequence[str]) -> FrozenSet[ElfFile]:
             elf_files.add(elf_file)
 
     return frozenset(elf_files)
-

@@ -21,11 +21,9 @@ import subprocess
 import sys
 from typing import List
 
-#import snapcraft
 from partbuilder.common import get_library_paths
 from partbuilder.formatting_utils import combine_paths
 from partbuilder import errors, repo
-#from snapcraft.project import Project
 
 logger = logging.getLogger(__name__)
 
@@ -76,7 +74,7 @@ class Wstool:
         self._wstool_stage_packages_path = (
             pathlib.Path(self._wstool_path) / "stage_packages"
         )
-        self._project = project
+        self._config = config
         self._base = base
 
     def setup(self) -> None:
@@ -103,7 +101,7 @@ class Wstool:
                 [
                     "init",
                     self._ros_package_path,
-                    "-j{}".format(self._project.parallel_build_count),
+                    "-j{}".format(self._config.parallel_build_count),
                 ]
             )
         except subprocess.CalledProcessError as e:
@@ -147,7 +145,7 @@ class Wstool:
             return self._run(
                 [
                     "update",
-                    "-j{}".format(self._project.parallel_build_count),
+                    "-j{}".format(self.config.parallel_build_count),
                     "-t{}".format(self._ros_package_path),
                 ]
             )
@@ -167,7 +165,7 @@ class Wstool:
             ld_library_path
             + combine_paths(
                 get_library_paths(
-                    self._wstool_install_path, self._project.arch_triplet
+                    self._wstool_install_path, self._config.arch_triplet
                 ),
                 prepend="",
                 separator=":",

@@ -27,9 +27,8 @@ such as: `filesets`, `stage`, `snap` and `organize`.
 
 import os
 
-#import snapcraft
-from partbuilder._file_utils import link_or_copy, link_or_copy_tree
 from partbuilder import errors, repo
+from partbuilder.utils import file_utils
 from partbuilder.plugins.v1 import PluginV1
 
 
@@ -55,7 +54,7 @@ class DumpPlugin(PluginV1):
 
     def build(self):
         super().build()
-        link_or_copy_tree(
+        file_utils.link_or_copy_tree(
             self.builddir,
             self.installdir,
             copy_function=lambda src, dst: _link_or_copy(src, dst, self.installdir),
@@ -80,7 +79,7 @@ def _link_or_copy(source, destination, boundary):
                 follow_symlinks = True
 
     try:
-        link_or_copy(
+        file_utils.link_or_copy(
             source, destination, follow_symlinks=follow_symlinks
         )
     except errors.SnapcraftCopyFileNotFoundError:

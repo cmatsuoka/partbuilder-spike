@@ -51,7 +51,7 @@ import sys
 
 from partbuilder import sources
 from partbuilder import errors
-from partbuilder._file_utils import link_or_copy, link_or_copy_tree
+from partbuilder.utils import file_utils
 from partbuilder.plugins.v1 import PluginV1
 
 _NODEJS_BASE = "node-v{version}-linux-{arch}"
@@ -161,9 +161,9 @@ class NodePlugin(PluginV1):
         package_dir = self._install(rootdir=self.builddir)
 
         # Now move everything over to the plugin's installdir
-        link_or_copy_tree(package_dir, self.installdir)
+        file_utils.link_or_copy_tree(package_dir, self.installdir)
         # Copy in the node binary
-        link_or_copy(
+        file_utils.link_or_copy(
             os.path.join(self._npm_dir, "bin", "node"),
             os.path.join(self.installdir, "bin", "node"),
         )

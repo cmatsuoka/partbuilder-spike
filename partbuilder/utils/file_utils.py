@@ -21,7 +21,14 @@ import sys
 import os
 import errno
 import shutil
-from contextlib import contextmanager, suppress
+import logging
+from contextlib import suppress
+from typing import Set, Optional
+
+from partbuilder import common, errors
+
+
+logger = logging.getLogger(__name__)
 
 
 def replace_in_file(
@@ -45,7 +52,6 @@ def replace_in_file(
                 # or the linked file will be rewritten on its own.
                 if not os.path.islink(file_path):
                     search_and_replace_contents(file_path, search_pattern, replacement)
-
 
 
 def search_and_replace_contents(
@@ -74,6 +80,7 @@ def search_and_replace_contents(
         logger.warning(
             "Unable to open {path} for writing: {error}".format(path=file_path, error=e)
         )
+
 
 def link_or_copy(source: str, destination: str, follow_symlinks: bool = False) -> None:
     """Hard-link source and destination files. Copy if it fails to link.
@@ -161,6 +168,7 @@ def copy(source: str, destination: str, *, follow_symlinks: bool = False) -> Non
             )
         )
 
+
 def link_or_copy_tree(
     source_tree: str,
     destination_tree: str,
@@ -180,14 +188,14 @@ def link_or_copy_tree(
     """
 
     if not os.path.isdir(source_tree):
-        raise errors.SnapcraftEnvironmentError(
+        raise errors.PartbuilderEnvironmentError(
             "{!r} is not a directory".format(source_tree)
         )
 
     if not os.path.isdir(destination_tree) and (
         os.path.exists(destination_tree) or os.path.islink(destination_tree)
     ):
-        raise errors.SnapcraftEnvironmentError(
+        raise errors.PartbuilderEnvironmentError(
             "Cannot overwrite non-directory {!r} with directory "
             "{!r}".format(destination_tree, source_tree)
         )
@@ -270,6 +278,22 @@ def get_snap_tool_path(command_name: str) -> str:
     return command_path
 
 
+def _find_command_path_in_root(root, command_name: str) -> Optional[str]:
+    for bin_directory in (
+        os.path.join("usr", "local", "sbin"),
+        os.path.join("usr", "local", "bin"),
+        os.path.join("usr", "sbin"),
+        os.path.join("usr", "bin"),
+        os.path.join("sbin"),
+        os.path.join("bin"),
+    ):
+        path = os.path.join(root, bin_directory, command_name)
+        if os.path.exists(path):
+            return path
+
+    return None
+
+
 def create_similar_directory(source: str, destination: str) -> None:
     """Create a directory with the same permission bits and owner information.
 
@@ -316,4 +340,3 @@ def get_resolved_relative_path(relative_path: str, base_directory: str) -> str:
     filename_relpath = os.path.relpath(filename_abspath, base_directory)
 
     return filename_relpath
-

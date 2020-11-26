@@ -35,9 +35,9 @@ Additionally, this plugin uses the following plugin-specific keywords:
 import os
 import shutil
 
-from partbuilder import _file_utils
 from partbuilder import common, elf, errors
 from partbuilder.plugins.v1 import PluginV1
+from partbuilder.utils import file_utils
 
 _CRYSTAL_CHANNEL = "latest/stable"
 

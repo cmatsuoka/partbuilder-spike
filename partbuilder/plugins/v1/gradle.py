@@ -59,7 +59,7 @@ import urllib.parse
 from glob import glob
 from typing import Sequence
 
-from partbuilder import _file_utils, formatting_utils
+from partbuilder.utils import file_utils, formatting_utils
 from partbuilder import errors, sources
 from partbuilder.plugins.v1 import PluginV1
 

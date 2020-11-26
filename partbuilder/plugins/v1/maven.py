@@ -61,9 +61,9 @@ from typing import Sequence, Optional
 from urllib.parse import urlparse
 from xml.etree import ElementTree
 
-from partbuilder import _file_utils, formatting_utils
 from partbuilder import errors, sources
 from partbuilder.plugins.v1 import PluginV1
+from partbuilder.utils import file_utils, formatting_utils
 
 logger = logging.getLogger(__name__)
 

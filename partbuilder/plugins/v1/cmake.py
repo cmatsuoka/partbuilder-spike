@@ -37,7 +37,6 @@ import logging
 import os
 from typing import List, Optional
 
-from partbuilder import errors
 from partbuilder.plugins.v1 import PluginV1
 
 logger = logging.getLogger(name=__name__)
@@ -95,10 +94,10 @@ class CMakePlugin(PluginV1):
         self.out_of_source_build = True
 
         # FIXME:SPIKE: test base version before calling plugins
-        #if project._get_build_base() not in ("core", "core16", "core18"):
-        #    raise errors.PluginBaseError(
-        #        part_name=self.name, base=project._get_build_base()
-        #    )
+        # if project._get_build_base() not in ("core", "core16", "core18"):
+        #     raise errors.PluginBaseError(
+        #         part_name=self.name, base=project._get_build_base()
+        #     )
 
         if options.make_parameters:
             logger.warning("make-paramaters is deprecated, ignoring.")

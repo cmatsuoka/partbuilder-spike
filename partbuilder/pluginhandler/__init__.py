@@ -28,10 +28,10 @@ import sys
 from glob import iglob
 from typing import cast, Dict, List, Optional, Set, Sequence, TYPE_CHECKING
 
-import partbuilder._file_utils as file_utils
-from partbuilder import _file_utils, plugins, yaml_utils
+from partbuilder import plugins
 from partbuilder import common, elf, errors, repo, sources, states, steps, xattrs
 from partbuilder.mangling import clear_execstack
+from partbuilder.utils import file_utils, yaml_utils
 from partbuilder import extractors
 
 from ._build_attributes import BuildAttributes
@@ -45,8 +45,7 @@ from ._outdated_report import OutdatedReport
 
 
 #if TYPE_CHECKING:
-#    from snapcraft.project import Project
-#    from snapcraft.config import Config
+#    from partbuilder import PartBuilder, BuildConfig
 
 logger = logging.getLogger(__name__)
 
@@ -61,13 +60,12 @@ class PluginHandler:
         *,
         plugin,
         part_properties,
-        builder,
-        config,
+        builder: "PartBuilder",
+        config: "BuildConfig",
         part_schema,
         definitions_schema,
         stage_packages_repo,
         grammar_processor,
-        #snap_base_path,
         soname_cache,
     ) -> None:
         self.valid = False
@@ -918,13 +916,13 @@ class PluginHandler:
         )
 
         # FIXME:SPIKE: deal with dependency paths
-        #if (
-        #    self._project._snap_meta.type in ("app", None)
-        #    and self._project._snap_meta.base is not None
-        #):
-        #    dependency_paths = self._handle_elf(snap_files)
-        #else:
-        #    dependency_paths = set()
+        # if (
+        #     self._project._snap_meta.type in ("app", None)
+        #     and self._project._snap_meta.base is not None
+        # ):
+        #     dependency_paths = self._handle_elf(snap_files)
+        # else:
+        #     dependency_paths = set()
 
         dependency_paths = set()
 
@@ -980,14 +978,15 @@ class PluginHandler:
         #     - The snap uses classic confinement
         #     OR
         #       - libc has been staged (as opposed to being in the base snap)
-        patching_required = (
-            self._project._snap_meta.base
-            and not self._project.is_static_base(self._project._snap_meta.base)
-            and (
-                self._project._snap_meta.confinement == "classic"
-                or "libc6" in self._part_properties.get("stage-packages", [])
-            )
-        )
+
+        # patching_required = (
+        #     self._project._snap_meta.base
+        #     and not self._project.is_static_base(self._project._snap_meta.base)
+        #     and (
+        #         self._project._snap_meta.confinement == "classic"
+        #         or "libc6" in self._part_properties.get("stage-packages", [])
+        #     )
+        # )
 
         return self._calculate_dependency_paths(split_dependencies)
 

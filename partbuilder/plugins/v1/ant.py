@@ -65,9 +65,9 @@ from glob import glob
 from typing import Sequence
 from urllib.parse import urlsplit
 
-from partbuilder import formatting_utils
-from partbuilder.plugins.v1 import PluginV1
 from partbuilder import errors, sources
+from partbuilder.plugins.v1 import PluginV1
+from partbuilder.utils import formatting_utils
 
 
 logger = logging.getLogger(__name__)

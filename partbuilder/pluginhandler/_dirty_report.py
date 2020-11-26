@@ -15,7 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from typing import List, Set, Union
-from partbuilder import formatting_utils
+from partbuilder.utils import formatting_utils
 
 # Ideally we'd just use Collection from typing, but that wasn't introduced
 # until 3.6

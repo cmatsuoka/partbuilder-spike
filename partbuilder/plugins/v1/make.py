@@ -48,9 +48,8 @@ Additionally, this plugin uses the following plugin-specific keywords:
 """
 
 import os
-import partbuilder.common
-from partbuilder import errors
 from partbuilder.plugins.v1 import PluginV1
+from partbuilder.utils import file_utils
 
 
 class MakePlugin(PluginV1):
@@ -90,10 +89,10 @@ class MakePlugin(PluginV1):
         super().__init__(name, options, config)
 
         # FIXME:SPIKE: move this test to a common location
-        #if config.build_base not in ("core", "core16", "core18", "core20"):
-        #    raise errors.PluginBaseError(
-        #        part_name=self.name, base=config._build_base
-        #    )
+        # if config.build_base not in ("core", "core16", "core18", "core20"):
+        #     raise errors.PluginBaseError(
+        #         part_name=self.name, base=config._build_base
+        #     )
 
         self.build_packages.append("make")
 
@@ -112,11 +111,11 @@ class MakePlugin(PluginV1):
                 source_path = os.path.join(self.builddir, artifact)
                 destination_path = os.path.join(self.installdir, artifact)
                 if os.path.isdir(source_path):
-                    snapcraft.file_utils.link_or_copy_tree(
+                    file_utils.link_or_copy_tree(
                         source_path, destination_path
                     )
                 else:
-                    snapcraft.file_utils.link_or_copy(source_path, destination_path)
+                    file_utils.link_or_copy(source_path, destination_path)
         else:
             command.append("install")
             if self.options.make_install_var:

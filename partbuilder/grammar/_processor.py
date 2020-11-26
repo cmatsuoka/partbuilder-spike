@@ -17,8 +17,6 @@
 import re
 from typing import Any, Callable, Dict, List, Set, Optional
 
-#from snapcraft import project
-#from partbuilder import Config
 from .errors import GrammarSyntaxError
 from . import typing
 from ._statement import Statement

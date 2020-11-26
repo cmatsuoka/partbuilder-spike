@@ -15,7 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import partbuilder.errors
-import partbuilder.formatting_utils
+from partbuilder.utils import formatting_utils
 
 
 class PythonPluginError(partbuilder.errors.PartbuilderError):
@@ -29,7 +29,7 @@ class MissingPythonCommandError(PythonPluginError):
     def __init__(self, python_version, search_paths):
         super().__init__(
             python_version=python_version,
-            search_paths=snapcraft.formatting_utils.combine_paths(
+            search_paths=formatting_utils.combine_paths(
                 search_paths, "", ":"
             ),
         )

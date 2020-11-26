@@ -18,7 +18,7 @@ from typing import Sequence
 
 from partbuilder import errors
 from partbuilder.errors import PartbuilderException
-#from snapcraft.internal.os_release import OsRelease
+from partbuilder.utils import os_utils
 from ._platform import _is_deb_based
 
 from typing import List, Optional
@@ -34,7 +34,7 @@ class NoNativeBackendError(RepoError):
 
     def __init__(self):
         try:
-            distro = OsRelease().name()
+            distro = os_utils.OsRelease().name()
         except errors.OsReleaseNameError:
             distro = "this system"
         super().__init__(distro=distro)
@@ -101,7 +101,7 @@ class PackageNotFoundError(RepoError):
     def message(self):
         message = "The package {!r} was not found.".format(self.package_name)
         # If the package was multiarch, try to help.
-        distro = OsRelease().id()
+        distro = os_utils.OsRelease().id()
         if _is_deb_based(distro) and ":" in self.package_name:
             (name, arch) = self.package_name.split(":", 2)
             if arch:

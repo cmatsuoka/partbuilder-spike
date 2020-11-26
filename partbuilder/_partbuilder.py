@@ -18,11 +18,7 @@ from collections import ChainMap
 import logging
 import platform
 import os
-from os import path
-from typing import List
 from typing import TYPE_CHECKING, cast, Union, Dict, List, Set, Any  # noqa: F401
-
-#from partbuilder import pluginhandler
 
 from partbuilder import lifecycle
 from partbuilder._schema import Validator
@@ -30,10 +26,8 @@ from partbuilder import steps, states
 from partbuilder import plugins
 from partbuilder import elf, pluginhandler, repo
 from partbuilder.pluginhandler._part_environment import (
-    get_global_environment,
     get_part_directory_environment,
 )
-from partbuilder.package_repository import PackageRepository
 from ._env import build_env, build_env_for_stage, runtime_env
 from . import errors, grammar_processing
 
@@ -123,7 +117,7 @@ class BuildConfig:
     def __init__(
         self, *,
         work_dir: str = "",
-        target_deb_arch = None,
+        target_deb_arch=None,
         base: str = None,
         is_git_version: bool = False,
         parallel_build_count: int = 1,
@@ -187,7 +181,6 @@ class BuildConfig:
         self.__machine_info = _ARCH_TRANSLATIONS[self.__target_machine]
 
 
-        
 class PartBuilder:
     # TODO: also specify part environment replacements
     def __init__(
@@ -202,7 +195,6 @@ class PartBuilder:
         self._parts = parts
         self._soname_cache = elf.SonameCache()
         self._parts_data = parts.get("parts", {})
-
 
         self._config = BuildConfig(**kwargs)
 
@@ -224,12 +216,12 @@ class PartBuilder:
     def part_names(self):
         return self._part_names
 
-    #@property
-    #def additional_build_packages(self):
-    #    packages = []
-    #    if self._is_cross_compiling:
-    #        packages.extend(self.__machine_info.get("cross-build-packages", []))
-    #    return packages
+    # @property
+    # def additional_build_packages(self):
+    #     packages = []
+    #     if self._is_cross_compiling:
+    #         packages.extend(self.__machine_info.get("cross-build-packages", []))
+    #     return packages
 
     def clean(self):
         lifecycle.execute(steps.CLEAN, self, _pre_hooks, _post_hooks)
@@ -386,8 +378,7 @@ class PartBuilder:
         grammar_processor = grammar_processing.PartGrammarProcessor(
             plugin=plugin,
             properties=part_properties,
-            #project=self._project,
-            config=self, # pass this config instead of project
+            config=self,
             repo=stage_packages_repo,
         )
 
@@ -395,12 +386,11 @@ class PartBuilder:
             plugin=plugin,
             part_properties=part_properties,
             config=self._config,
-            builder=self, # pass this config instead of project
+            builder=self,
             part_schema=self._validator.part_schema,
             definitions_schema=self._validator.definitions_schema,
             stage_packages_repo=stage_packages_repo,
             grammar_processor=grammar_processor,
-            #snap_base_path=path.join("/", "snap", self._project.info.name, "current"),
             soname_cache=self._soname_cache,
         )
 
@@ -427,10 +417,9 @@ class PartBuilder:
                 stagedir, self._config.arch_triplet
             )
 
-            global_env = get_global_environment(self._config)
             part_env = get_part_directory_environment(part)
 
-            for variable, value in ChainMap(part_env, global_env).items():
+            for variable, value in part_env.items():
                 env.append('{}="{}"'.format(variable, value))
 
             # Finally, add the declared environment from the part.
@@ -455,7 +444,6 @@ class PartBuilder:
 
         return deduped_env
 
-
     def install_package_repositories(self) -> None:
         package_repos = self._package_repositories
         if not package_repos:
@@ -476,8 +464,8 @@ class PartBuilder:
         self.install_package_repositories()
 
         # FIXME:SPIKE: re-add global and additional build packages
-        #build_packages = self._global_grammar_processor.get_build_packages()
-        #build_packages |= set(self.additional_build_packages)
+        # build_packages = self._global_grammar_processor.get_build_packages()
+        # build_packages |= set(self.additional_build_packages)
         build_packages = set()
 
         if self._config.is_git_version:
@@ -510,7 +498,6 @@ class PartBuilder:
         print("TODO: get content snaps")
         return set()
 
-
     def _get_global_state_file_path(self) -> str:
         if self._is_managed_host:
             state_file_path = os.path.join(self._work_dir, "state")
@@ -518,13 +505,6 @@ class PartBuilder:
             state_file_path = os.path.join(self._config.parts_dir, ".snapcraft_global_state")
 
         return state_file_path
-
-    def project_env(self):
-        return [
-            '{}="{}"'.format(variable, value)
-            for variable, value in get_global_environment(self._config).items()
-        ]
-
 
     def get_project_state(self, step: steps.Step):
         """Returns a dict of states for the given step of each part."""
@@ -535,23 +515,23 @@ class PartBuilder:
 
         return state
 
-  
+
 # decorators
 
 def pre_step(func):
     _pre_hooks.append(func)
     return func
 
+
 def post_step(func):
     _post_hooks.append(func)
     return func
 
-def plugin(name:str):
+
+def plugin(name: str):
     def decorate(class_):
         _custom_plugins.update({name: class_})
     return decorate
-
-
 
 
 def _get_platform_architecture():
@@ -560,14 +540,15 @@ def _get_platform_architecture():
     # FIXME:SPIKE: handle windows case
     # Translate the windows architectures we know of to architectures
     # we can work with.
-    #if sys.platform == "win32":
-    #    architecture = _WINDOWS_TRANSLATIONS.get(architecture)
-    #if platform.architecture()[0] == "32bit":
-    #    userspace = _32BIT_USERSPACE_ARCHITECTURE.get(architecture)
-    #    if userspace:
-    #        architecture = userspace
+    # if sys.platform == "win32":
+    #     architecture = _WINDOWS_TRANSLATIONS.get(architecture)
+    # if platform.architecture()[0] == "32bit":
+    #     userspace = _32BIT_USERSPACE_ARCHITECTURE.get(architecture)
+    #     if userspace:
+    #         architecture = userspace
 
     return architecture
+
 
 # FIXME:SPIKE: find a better place for this
 def replace_attr(
@@ -589,5 +570,3 @@ def replace_attr(
         return result
 
     return attr
-
-

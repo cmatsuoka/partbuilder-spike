@@ -21,6 +21,8 @@ from .errors import OnStatementSyntaxError
 from . import typing
 from ._statement import Statement
 
+#from partbuilder import BuildConfig
+
 # Don't use circular imports unless type checking
 if TYPE_CHECKING:
     from ._processor import GrammarProcessor  # noqa: F401
@@ -80,7 +82,7 @@ class OnStatement(Statement):
         """
         # A new ProjectOptions instance defaults to the host architecture
         # whereas self._project_options would yield the target architecture
-        host_arch = snapcraft.ProjectOptions().deb_arch
+        host_arch = BuildConfig().deb_arch
 
         # The only selector currently supported is the host arch. Since
         # selectors are matched with an AND, not OR, there should only be one

@@ -13,10 +13,12 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from partbuilder._file_utils import calculate_hash
-from . import errors
 
 from typing import Tuple
+
+from partbuilder.utils import file_utils
+from . import errors
+
 
 
 def split_checksum(source_checksum: str) -> Tuple:
@@ -45,7 +47,7 @@ def verify_checksum(source_checksum: str, checkfile: str) -> Tuple:
     """
     algorithm, digest = split_checksum(source_checksum)
 
-    calculated_digest = calculate_hash(checkfile, algorithm=algorithm)
+    calculated_digest = file_utils.calculate_hash(checkfile, algorithm=algorithm)
     if digest != calculated_digest:
         raise errors.DigestDoesNotMatchError(digest, calculated_digest)
 

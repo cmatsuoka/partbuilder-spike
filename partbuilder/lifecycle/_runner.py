@@ -23,7 +23,6 @@ from partbuilder import (
     common,
     errors,
     pluginhandler,
-    #project_loader,
     repo,
     states,
     steps,
@@ -31,8 +30,8 @@ from partbuilder import (
 from partbuilder.pluginhandler._part_environment import (
     get_part_directory_environment,
 )
-#from snapcraft.internal.meta._snap_packaging import create_snap_packaging
 from ._status_cache import StatusCache
+
 
 @enum.unique
 class OutdatedStepAction(enum.Enum):
@@ -41,14 +40,14 @@ class OutdatedStepAction(enum.Enum):
     CLEAN = 2
 
 
-
 logger = logging.getLogger(__name__)
+
 
 # FIXME:SPIKE: deal with grades
 def _get_required_grade(*, base: Optional[str], arch: str) -> str:
     return "devel"
 
-#def _get_required_grade(*, base: Optional[str], arch: str) -> str:
+# def _get_required_grade(*, base: Optional[str], arch: str) -> str:
 #    # Some types of snap do not require a base.
 #    if base is None:
 #        return "stable"
@@ -64,6 +63,7 @@ def _get_required_grade(*, base: Optional[str], arch: str) -> str:
 #    else:
 #        return "stable"
 #
+
 
 def _install_build_packages(build_packages: Set[str]) -> List[str]:
     return repo.Repo.install_build_packages(build_packages)
@@ -100,8 +100,8 @@ def _install_build_snaps(build_snaps: Set[str], content_snaps: Set[str]) -> List
 def execute(
     step: steps.Step,
     builder,
-    pre_hooks = [],
-    post_hooks = [],
+    pre_hooks=[],
+    post_hooks=[],
     part_names: Sequence[str] = None,
 ):
     """Execute until step in the lifecycle for part_names or all parts.
@@ -156,10 +156,10 @@ def execute(
 
     # FIXME:SPIKE: this information is ignored
     return {
-        "name": "", #project_config._name,
-        "version": "", #project_config._version,
-        "arch": [], #project_config.data["architectures"],
-        "type": "" #project_config.data.get("type", ""),
+        "name": "",  # project_config._name,
+        "version": "",  # project_config._version,
+        "arch": [],  # project_config.data["architectures"],
+        "type": ""  # project_config.data.get("type", ""),
     }
 
 
@@ -197,7 +197,7 @@ class _Executor:
             processed_part_names = self.builder.part_names
 
         # FIXME:SPIKE: find out what cli_config is doing here
-        #with CLIConfig() as cli_config:
+        # with CLIConfig() as cli_config:
         #    for current_step in step.previous_steps() + [step]:
         #        if current_step == steps.STAGE:
         #            # XXX check only for collisions on the parts that have
@@ -346,7 +346,7 @@ class _Executor:
             common.env.extend(self.builder.project_env())
 
         # FIXME:SPIKE: handle replacements
-        #part = _replace_in_part(part)
+        # part = _replace_in_part(part)
 
     def _run_step(self, *, step: steps.Step, part, progress, hint=""):
         self._prepare_step(step=step, part=part)
@@ -382,7 +382,7 @@ class _Executor:
             print("SPIKE: skip create_snap_packaging(self.builder)")
 
     def _handle_dirty(self, part, step, dirty_report, cli_config):
-        dirty_action = OutdatedStepAction.CLEAN   #cli_config.get_outdated_step_action()
+        dirty_action = OutdatedStepAction.CLEAN   # cli_config.get_outdated_step_action()
         if not step.clean_if_dirty:
             if dirty_action == OutdatedStepAction.ERROR:
                 raise errors.StepOutdatedError(
@@ -394,7 +394,7 @@ class _Executor:
         )
 
     def _handle_outdated(self, part, step, outdated_report, cli_config):
-        dirty_action = OutdatedStepAction.CLEAN  #cli_config.get_outdated_step_action()
+        dirty_action = OutdatedStepAction.CLEAN  # cli_config.get_outdated_step_action()
         if not step.clean_if_dirty:
             if dirty_action == OutdatedStepAction.ERROR:
                 raise errors.StepOutdatedError(

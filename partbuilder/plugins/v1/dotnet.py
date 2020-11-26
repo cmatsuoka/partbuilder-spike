@@ -38,8 +38,8 @@ import json
 from typing import List
 
 from partbuilder import sources
-from partbuilder import formatting_utils
 from partbuilder import errors
+from partbuilder.utils import formatting_utils
 from partbuilder.plugins.v1 import PluginV1
 
 

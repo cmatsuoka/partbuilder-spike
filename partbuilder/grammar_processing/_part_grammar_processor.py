@@ -16,7 +16,6 @@
 
 from typing import Any, Dict, Set
 
-#from snapcraft import project, BasePlugin
 from partbuilder import BasePlugin
 from partbuilder import grammar
 from partbuilder import repo

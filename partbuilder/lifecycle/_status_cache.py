@@ -19,13 +19,13 @@ import contextlib
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set
 
 from partbuilder import errors, pluginhandler, steps
-#import snapcraft.internal.project_loader._config as _config
 
 _DirtyReport = Dict[str, Dict[steps.Step, Optional[pluginhandler.DirtyReport]]]
 _OutdatedReport = Dict[str, Dict[steps.Step, Optional[pluginhandler.OutdatedReport]]]
 
 if TYPE_CHECKING:
     from partbuilder.config import Config
+
 
 class StatusCache:
     """The StatusCache is a lazy caching interface for the status of parts."""

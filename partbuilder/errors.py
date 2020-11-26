@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import collections
 import contextlib
 import shlex
 from abc import ABC, abstractmethod
@@ -21,6 +22,7 @@ from subprocess import CalledProcessError
 from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
 from partbuilder import steps
+from partbuilder.utils import formatting_utils
 
 # dict of jsonschema validator -> cause pairs. Wish jsonschema just gave us
 # better messages.
@@ -45,6 +47,7 @@ class PartbuilderError(Exception):
     def get_exit_code(self):
         """Exit code to use if this exception causes Snapcraft to exit."""
         return 2
+
 
 class PartbuilderException(Exception, ABC):
     """Base class for Snapcraft Exceptions."""
@@ -75,6 +78,7 @@ class PartbuilderException(Exception, ABC):
 
     def __str__(self) -> str:
         return self.get_brief()
+
 
 class OsReleaseIdError(PartbuilderError):
 
@@ -270,8 +274,6 @@ class PartbuilderPluginBuildError(PartbuilderException):
         return "Check the build logs and ensure the part's configuration and sources are correct."
 
 
-
-
 class PartbuilderEnvironmentError(PartbuilderException):
     """DEPRECATED: Too generic, create (or re-use) a tailored one."""
 
@@ -294,7 +296,6 @@ class StepHasNotRunError(PartbuilderError):
 
     def __init__(self, part_name, step):
         super().__init__(part_name=part_name, step=step)
-
 
 
 class NoLatestStepError(PartbuilderError):
@@ -330,8 +331,6 @@ class MissingStateCleanError(PartbuilderException):
         return CLEAN_RESOLUTION
 
 
-
-
 def _determine_preamble(error):
     messages = []
     path = _determine_property_path(error)
@@ -342,6 +341,7 @@ def _determine_preamble(error):
             )
         )
     return " ".join(messages)
+
 
 def _determine_cause(error):
     messages = []
@@ -365,7 +365,7 @@ def _determine_cause(error):
 
     # anyOf failures might have usable context... try to improve them a bit
     if error.validator == "anyOf":
-        contextual_messages: Dict[str, str] = OrderedDict()
+        contextual_messages: Dict[str, str] = collections.OrderedDict()
         for contextual_error in error.context:
             key = contextual_error.schema_path.popleft()
             if key not in contextual_messages:
@@ -383,6 +383,7 @@ def _determine_cause(error):
 
     return " ".join(messages)
 
+
 def _determine_supplemental_info(error):
     message = _VALIDATION_ERROR_CAUSES.get(error.validator, "").format(
         validator_value=error.validator_value
@@ -396,6 +397,7 @@ def _determine_supplemental_info(error):
 
     return message
 
+
 def _determine_property_path(error):
     path = []
     while error.absolute_path:
@@ -407,4 +409,3 @@ def _determine_property_path(error):
             path.append(str(element))
 
     return path
-

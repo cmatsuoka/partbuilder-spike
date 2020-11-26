@@ -14,7 +14,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#from snapcraft import project
 from partbuilder.grammar import (
     CompoundStatement,
     Statement,
@@ -43,6 +42,6 @@ def package_transformer(
     if any(_is_or_contains_to_statement(s) for s in call_stack):
         if ":" not in package_name:
             # deb_arch is target arch or host arch if both are the same
-            package_name += ":{}".format(project.deb_arch)
+            package_name += ":{}".format(config.deb_arch)
 
     return package_name

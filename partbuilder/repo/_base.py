@@ -27,8 +27,8 @@ import stat
 
 from typing import List, Optional, Set
 
-from partbuilder import _file_utils as file_utils
 from partbuilder import mangling, xattrs
+from partbuilder.utils import file_utils
 from . import errors
 
 

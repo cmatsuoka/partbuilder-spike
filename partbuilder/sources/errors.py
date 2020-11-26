@@ -16,8 +16,8 @@
 
 import shlex
 
-from partbuilder import formatting_utils
 from partbuilder import errors
+from partbuilder.utils import formatting_utils
 
 from typing import List
 

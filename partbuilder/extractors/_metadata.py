@@ -16,7 +16,7 @@
 
 from typing import Any, Dict, List, Optional, Set, Union
 
-from partbuilder import yaml_utils
+from partbuilder.utils import yaml_utils
 
 
 class ExtractedMetadata(yaml_utils.SnapcraftYAMLObject):

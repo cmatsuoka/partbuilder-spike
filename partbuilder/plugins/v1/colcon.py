@@ -66,13 +66,13 @@ import shutil
 import textwrap
 from typing import List
 
-from partbuilder import _file_utils
 from partbuilder import errors, mangling, os_release, repo
 from partbuilder.package_repository import (
     PackageRepository,
     PackageRepositoryApt,
 )
 from partbuilder.plugins.v1 import PluginV1, _python, _ros
+from partbuilder.utils import file_utils
 
 logger = logging.getLogger(__name__)
 

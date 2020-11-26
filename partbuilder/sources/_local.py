@@ -19,13 +19,13 @@ import functools
 import glob
 import os
 
-from partbuilder import _file_utils
+from partbuilder.utils import file_utils
 from partbuilder import common
 from ._base import Base
 
 
 class Local(Base):
-    def __init__(self, *args, copy_function=_file_utils.link_or_copy, **kwargs):
+    def __init__(self, *args, copy_function=file_utils.link_or_copy, **kwargs):
         super().__init__(*args, **kwargs)
         self.source_abspath = os.path.abspath(self.source)
         self.copy_function = copy_function

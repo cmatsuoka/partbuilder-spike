@@ -16,8 +16,8 @@
 
 import os
 
-from partbuilder import yaml_utils
 from partbuilder import steps
+from partbuilder.utils import yaml_utils
 
 
 class State(yaml_utils.SnapcraftYAMLObject):

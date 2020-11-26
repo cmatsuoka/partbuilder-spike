@@ -27,9 +27,8 @@ import sys
 import tempfile
 from typing import Dict, List, Optional, Sequence, Set
 
-#import snapcraft
-from partbuilder import _file_utils
-from partbuilder import mangling
+from partbuilder import common, mangling
+from partbuilder.utils import file_utils
 from ._python_finder import get_python_command, get_python_headers, get_python_home
 from . import errors
 
@@ -520,15 +519,15 @@ class Pip:
     def _run(self, args, runner=None, **kwargs):
         env = self.env()
 
-	# FIXME:SPIKE:
+        # FIXME:SPIKE:
         # Using None as the default value instead of common.run so we can mock
         # common.run.
-        #if runner is None:
-        #    runner = snapcraft.internal.common.run
+        # if runner is None:
+        #     runner = snapcraft.internal.common.run
 
         return runner(
             [self._python_command, "-m", "pip"] + list(args), env=env, **kwargs
         )
 
     def _run_output(self, args, **kwargs):
-        return self._run(args, runner=snapcraft.internal.common.run_output, **kwargs)
+        return self._run(args, runner=common.run_output, **kwargs)

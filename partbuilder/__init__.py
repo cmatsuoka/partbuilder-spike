@@ -14,17 +14,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#from .config import Config
-
 from partbuilder.plugins.v1 import PluginV1 as BasePlugin  # noqa: F401
 
-from ._partbuilder import BuildConfig
-from ._partbuilder import PartBuilder
+from ._partbuilder import BuildConfig  # noqa: F401
+from ._partbuilder import PartBuilder  # noqa: F401
 
-from .plugins.v1 import PluginV1
-from .plugins.v2 import PluginV2
+from .plugins.v1 import PluginV1  # noqa: F401
+from .plugins.v2 import PluginV2  # noqa: F401
 
 # decorators
-from ._partbuilder import pre_step
-from ._partbuilder import post_step
-from ._partbuilder import plugin
+from ._partbuilder import pre_step   # noqa: F401
+from ._partbuilder import post_step  # noqa: F401
+from ._partbuilder import plugin     # noqa: F401

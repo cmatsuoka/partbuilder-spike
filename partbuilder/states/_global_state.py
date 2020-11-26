@@ -19,7 +19,7 @@ from typing import List, Optional, Type
 
 from mypy_extensions import TypedDict
 
-from partbuilder import yaml_utils
+from partbuilder.utils import yaml_utils
 from partbuilder.states._state import State
 
 

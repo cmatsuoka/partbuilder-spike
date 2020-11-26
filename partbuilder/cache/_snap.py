@@ -21,13 +21,13 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-#from ._cache import SnapcraftProjectCache
-from partbuilder import _file_utils, yaml_utils
+from partbuilder.utils import file_utils, yaml_utils
+from partbuilder.cache import PartbuilderProjectCache
 
 logger = logging.getLogger(__name__)
 
 
-class SnapCache(SnapcraftProjectCache):
+class SnapCache(PartbuilderProjectCache):
     """Cache for snap revisions."""
 
     def __init__(self, *, project_name):
