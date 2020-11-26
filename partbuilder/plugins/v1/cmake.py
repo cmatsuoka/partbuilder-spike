@@ -94,10 +94,11 @@ class CMakePlugin(PluginV1):
         self.build_packages.append("cmake")
         self.out_of_source_build = True
 
-        if project._get_build_base() not in ("core", "core16", "core18"):
-            raise errors.PluginBaseError(
-                part_name=self.name, base=project._get_build_base()
-            )
+        # FIXME:SPIKE: test base version before calling plugins
+        #if project._get_build_base() not in ("core", "core16", "core18"):
+        #    raise errors.PluginBaseError(
+        #        part_name=self.name, base=project._get_build_base()
+        #    )
 
         if options.make_parameters:
             logger.warning("make-paramaters is deprecated, ignoring.")
@@ -149,13 +150,13 @@ class CMakePlugin(PluginV1):
         env = os.environ.copy()
         env["DESTDIR"] = self.installdir
         env["CMAKE_PREFIX_PATH"] = "$CMAKE_PREFIX_PATH:{}".format(
-            self.project.stage_dir
+            self.config.stage_dir
         )
         env["CMAKE_INCLUDE_PATH"] = "$CMAKE_INCLUDE_PATH:" + ":".join(
             ["{0}/include", "{0}/usr/include", "{0}/include/{1}", "{0}/usr/include/{1}"]
-        ).format(self.project.stage_dir, self.project.arch_triplet)
+        ).format(self.config.stage_dir, self.config.arch_triplet)
         env["CMAKE_LIBRARY_PATH"] = "$CMAKE_LIBRARY_PATH:" + ":".join(
             ["{0}/lib", "{0}/usr/lib", "{0}/lib/{1}", "{0}/usr/lib/{1}"]
-        ).format(self.project.stage_dir, self.project.arch_triplet)
+        ).format(self.config.stage_dir, self.config.arch_triplet)
 
         return env

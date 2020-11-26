@@ -29,10 +29,10 @@ if sys.platform == "linux" or TYPE_CHECKING:
         "v1": {
             "ant": v1.AntPlugin,
             "autotools": v1.AutotoolsPlugin,
-            "catkin": v1.CatkinPlugin,
-            "catkin-tools": v1.CatkinToolsPlugin,
+            #"catkin": v1.CatkinPlugin,
+            #"catkin-tools": v1.CatkinToolsPlugin,
             "cmake": v1.CMakePlugin,
-            "colcon": v1.ColconPlugin,
+            #"colcon": v1.ColconPlugin,
             "conda": v1.CondaPlugin,
             "crystal": v1.CrystalPlugin,
             "dotnet": v1.DotNetPlugin,
