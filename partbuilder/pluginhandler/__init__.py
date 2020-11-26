@@ -40,7 +40,6 @@ from ._metadata_extraction import extract_metadata
 from ._part_environment import get_part_environment
 from ._plugin_loader import load_plugin  # noqa: F401
 from ._runner import Runner
-from ._patchelf import PartPatcher
 from ._dirty_report import Dependency, DirtyReport  # noqa
 from ._outdated_report import OutdatedReport
 
@@ -78,8 +77,6 @@ class PluginHandler:
         self._stage_packages_repo = stage_packages_repo
         self._grammar_processor = grammar_processor
         self._config = config
-        # FIXME:SPIKE: this will be used by patchelf
-        #self._snap_base_path = snap_base_path
         self._soname_cache = soname_cache
         self._source = grammar_processor.get_source()
         if not self._source:
@@ -991,34 +988,6 @@ class PluginHandler:
                 or "libc6" in self._part_properties.get("stage-packages", [])
             )
         )
-
-        # In addition to considering whether patching is NEEDED, we need to account
-        # for the user requesting different behavior:
-        #
-        #  - Opting out of patching even though it's needed (i.e. `no-patchelf` is a
-        #    build attribute)
-        #  - Requesting patching even though it's not needed (i.e. `enable-patchelf` is
-        #    a build attribute)
-        if (
-            self._build_attributes.no_patchelf()
-            and self._build_attributes.enable_patchelf()
-        ):
-            raise errors.BuildAttributePatchelfConflictError(part_name=self.name)
-        elif patching_required and self._build_attributes.no_patchelf():
-            logger.warning(
-                "The primed files for part {!r} will not be verified for "
-                "correctness or patched: build-attributes: [no-patchelf] "
-                "is set.".format(self.name)
-            )
-        elif patching_required or self._build_attributes.enable_patchelf():
-            part_patcher = PartPatcher(
-                elf_files=elf_files,
-                project=self._project,
-                # FIXME:SPIKE: set snap base path
-                snap_base_path=None, #self._snap_base_path,
-                stage_packages=self._part_properties.get("stage-packages", []),
-            )
-            part_patcher.patch()
 
         return self._calculate_dependency_paths(split_dependencies)
 
