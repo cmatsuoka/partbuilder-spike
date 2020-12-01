@@ -117,13 +117,13 @@ class BuildConfig:
     def __init__(
         self, *,
         work_dir: str = "",
-        target_deb_arch=None,    # use target_arch, translate to deb arch internally
+        target_arch=None,
         base: str = None,        # obtain this information internally
         parallel_build_count: int = 1,
         local_plugins_dir: str = "",
         **xargs
     ):
-        self._set_machine(target_deb_arch)
+        self._set_machine(target_arch)
 
         self.build_base = base
         self._parallel_build_count = parallel_build_count
@@ -163,14 +163,14 @@ class BuildConfig:
     def deb_arch(self) -> str:
         return self.__machine_info["deb"]
 
-    def _set_machine(self, target_deb_arch):
+    def _set_machine(self, target_arch):
         self.__platform_arch = _get_platform_architecture()
-        self.__target_arch = target_deb_arch
-        if not target_deb_arch:
+        self.__target_arch = target_arch
+        if not target_arch:
             self.__target_machine = self.__platform_arch
         else:
-            self.__target_machine = _find_machine(target_deb_arch)
-            logger.info("Setting target machine to {!r}".format(target_deb_arch))
+            self.__target_machine = _find_machine(target_arch)
+            logger.info("Setting target machine to {!r}".format(target_arch))
         self.__machine_info = _ARCH_TRANSLATIONS[self.__target_machine]
 
 
