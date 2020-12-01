@@ -117,9 +117,8 @@ class BuildConfig:
     def __init__(
         self, *,
         work_dir: str = "",
-        target_deb_arch=None,
-        base: str = None,
-        is_git_version: bool = False,
+        target_deb_arch=None,    # use target_arch, translate to deb arch internally
+        base: str = None,        # obtain this information internally
         parallel_build_count: int = 1,
         local_plugins_dir: str = "",
         **xargs
@@ -127,7 +126,6 @@ class BuildConfig:
         self._set_machine(target_deb_arch)
 
         self.build_base = base
-        self._is_git_version = is_git_version
         self._parallel_build_count = parallel_build_count
         self._local_plugins_dir = local_plugins_dir
 
@@ -152,11 +150,6 @@ class BuildConfig:
     @property
     def is_cross_compiling(self) -> bool:
         return self.__target_machine != self.__platform_arch
-
-    # FIXME:SPIKE: handle this in a better way
-    @property
-    def is_git_version(self) -> bool:
-        return self._is_git_version
 
     @property
     def parallel_build_count(self) -> int:
@@ -187,6 +180,7 @@ class PartBuilder:
         self, *,
         parts: Dict[str, Any],
         package_repositories: List[str] = [],
+        build_packages: List[str] = [],
 
         # BuildConfig parameters
         **kwargs
@@ -202,6 +196,7 @@ class PartBuilder:
         self._is_managed_host = False
 
         self._package_repositories = package_repositories
+        self._build_packages = build_packages
 
         self._validator = Validator(parts)
         self._validator.validate()
@@ -216,12 +211,12 @@ class PartBuilder:
     def part_names(self):
         return self._part_names
 
-    # @property
-    # def additional_build_packages(self):
-    #     packages = []
-    #     if self._is_cross_compiling:
-    #         packages.extend(self.__machine_info.get("cross-build-packages", []))
-    #     return packages
+    @property
+    def additional_build_packages(self):
+        packages = self._build_packages
+        if self._is_cross_compiling:
+            packages.extend(self.__machine_info.get("cross-build-packages", []))
+        return packages
 
     def clean(self):
         lifecycle.execute(steps.CLEAN, self, _pre_hooks, _post_hooks)
@@ -468,8 +463,9 @@ class PartBuilder:
         # build_packages |= set(self.additional_build_packages)
         build_packages = set()
 
-        if self._config.is_git_version:
-            build_packages.add("git")
+        # FIXME:SPIKE: allow the application to specificy extra packages
+        #if self._config.is_git_version:
+        #    build_packages.add("git")
 
         for part in self.all_parts:
             build_packages |= part._grammar_processor.get_build_packages()
