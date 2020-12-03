@@ -20,7 +20,7 @@ from partbuilder import common, steps
 from partbuilder.utils import formatting_utils
 
 if TYPE_CHECKING:
-    from partbuilder import BuildConfig
+    from partbuilder import PartData
     from . import PluginHandler
 
 

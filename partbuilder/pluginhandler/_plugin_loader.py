@@ -28,7 +28,7 @@ from partbuilder import errors
 from partbuilder import plugins
 
 #if TYPE_CHECKING:
-#    from Partbuilder import BuildConfig
+#    from Partbuilder import PartData
 
 _custom_plugins = {}
 
@@ -43,7 +43,7 @@ logger = logging.getLogger(__name__)
 def load_plugin(
     plugin_name: str,
     part_name: str,
-    config: "BuildConfig",
+    config: "PartData",
     properties,
     part_schema,
     definitions_schema,

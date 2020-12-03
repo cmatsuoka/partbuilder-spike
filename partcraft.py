@@ -12,7 +12,7 @@ def run(name, version, file_name):
         parts = yaml.safe_load(f)
 
     # TODO: change explicit base spec with plugin v1/v2 control?
-    builder = partbuilder.PartBuilder(
+    lm = partbuilder.LifecycleManager(
         parts=parts,
         base="core20",
         this_project_name=name,
@@ -20,11 +20,11 @@ def run(name, version, file_name):
         this_project_version=version,
         extensions_dir="/my/extensions/dir"
     )
-    builder.prime()
+    lm.prime()
 
 
 @partbuilder.pre_step
-def set_part_environment(config: partbuilder.BuildConfig):
+def set_part_environment(config: partbuilder.PartData):
     # mimic the part environment set by snapcraft
     env = {
         "SNAPCRAFT_ARCH_TRIPLET": config.arch_triplet,

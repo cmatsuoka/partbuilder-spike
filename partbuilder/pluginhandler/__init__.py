@@ -45,7 +45,7 @@ from ._outdated_report import OutdatedReport
 
 
 #if TYPE_CHECKING:
-#    from partbuilder import PartBuilder, BuildConfig
+#    from partbuilder import LifecycleManager, PartData
 
 logger = logging.getLogger(__name__)
 
@@ -60,8 +60,8 @@ class PluginHandler:
         *,
         plugin,
         part_properties,
-        builder: "PartBuilder",
-        config: "BuildConfig",
+        builder: "LifecycleManager",
+        config: "PartData",
         part_schema,
         definitions_schema,
         stage_packages_repo,

@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 
 if TYPE_CHECKING:
-    from partbuilder import BuildConfig
+    from partbuilder import PartData
 
 
 def _clean_part(part_name, step, config, staged_state, primed_state):
@@ -91,7 +91,7 @@ def _remove_directory_if_empty(directory):
         os.rmdir(directory)
 
 
-def _cleanup_common_directories(config: "BuildConfig") -> None:
+def _cleanup_common_directories(config: "PartData") -> None:
     max_step = None
     for part in config.all_parts:
         with contextlib.suppress(errors.NoLatestStepError):
@@ -104,7 +104,7 @@ def _cleanup_common_directories(config: "BuildConfig") -> None:
         _cleanup_common_directories_for_step(next_step, config)
 
 
-def _cleanup_common_directories_for_step(step, config: "BuildConfig", parts=None):
+def _cleanup_common_directories_for_step(step, config: "PartData", parts=None):
     if not parts:
         parts = []
 
@@ -186,7 +186,7 @@ def _cleanup_parts_dir(parts_dir, local_plugins_dir, parts):
         part.mark_cleaned(steps.PULL)
 
 
-def clean(config: "BuildConfig", parts, step=None):
+def clean(config: "PartData", parts, step=None):
     # step defaults to None because that's how it comes from docopt when it's
     # not set.
     if not step:

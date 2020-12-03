@@ -113,7 +113,7 @@ _pre_hooks = []
 _post_hooks = []
 
 
-class BuildConfig:
+class PartData:
     def __init__(
         self, *,
         work_dir: str = "",
@@ -174,7 +174,7 @@ class BuildConfig:
         self.__machine_info = _ARCH_TRANSLATIONS[self.__target_machine]
 
 
-class PartBuilder:
+class LifecycleManager:
     # TODO: also specify part environment replacements
     def __init__(
         self, *,
@@ -182,7 +182,7 @@ class PartBuilder:
         package_repositories: List[str] = [],
         build_packages: List[str] = [],
 
-        # BuildConfig parameters
+        # PartData parameters
         **kwargs
 
     ):
@@ -190,7 +190,7 @@ class PartBuilder:
         self._soname_cache = elf.SonameCache()
         self._parts_data = parts.get("parts", {})
 
-        self._config = BuildConfig(**kwargs)
+        self._config = PartData(**kwargs)
 
         # FIXME:SPIKE: deal with managed host
         self._is_managed_host = False

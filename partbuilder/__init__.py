@@ -16,8 +16,8 @@
 
 from partbuilder.plugins.v1 import PluginV1 as BasePlugin  # noqa: F401
 
-from ._partbuilder import BuildConfig  # noqa: F401
-from ._partbuilder import PartBuilder  # noqa: F401
+from ._partbuilder import PartData  # noqa: F401
+from ._partbuilder import LifecycleManager  # noqa: F401
 
 from .plugins.v1 import PluginV1  # noqa: F401
 from .plugins.v2 import PluginV2  # noqa: F401

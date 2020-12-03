@@ -32,7 +32,7 @@ from xdg import BaseDirectory
 
 from partbuilder.indicators import is_dumb_terminal
 from partbuilder.utils import file_utils
-#from .._partbuilder import os_release, BuildConfig
+#from .._partbuilder import os_release, PartData
 
 from . import apt_ppa, errors
 from ._base import BaseRepo, get_pkg_name_parts
@@ -199,8 +199,9 @@ def _run_dpkg_query_list_files(package_name: str) -> Set[str]:
     return {i for i in output if ("lib" in i and os.path.isfile(i))}
 
 
+# FIXME:SPIKE: obtain deb_arch from arch
 def _get_host_arch() -> str:
-    return BuildConfig().deb_arch
+    return PartData().deb_arch
 
 
 def _get_dpkg_list_path(base: str) -> pathlib.Path:

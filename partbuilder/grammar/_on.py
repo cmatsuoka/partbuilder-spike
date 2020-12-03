@@ -21,7 +21,7 @@ from .errors import OnStatementSyntaxError
 from . import typing
 from ._statement import Statement
 
-#from partbuilder import BuildConfig
+#from partbuilder import PartData
 
 # Don't use circular imports unless type checking
 if TYPE_CHECKING:
@@ -82,7 +82,8 @@ class OnStatement(Statement):
         """
         # A new ProjectOptions instance defaults to the host architecture
         # whereas self._project_options would yield the target architecture
-        host_arch = BuildConfig().deb_arch
+        # FIXME:SPIKE: obtain deb_arch from arch
+        host_arch = PartData().deb_arch
 
         # The only selector currently supported is the host arch. Since
         # selectors are matched with an AND, not OR, there should only be one
