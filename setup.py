@@ -24,6 +24,7 @@ setup(
         "partbuilder.repo",
         "partbuilder.sources",
         "partbuilder.states",
+        "partbuilder.utils",
     ]
 )
 
