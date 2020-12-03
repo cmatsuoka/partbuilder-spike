@@ -66,7 +66,7 @@ class PluginV1:
     def stage_packages(self, value):
         self._stage_packages = value
 
-    def __init__(self, name, options, config=None):
+    def __init__(self, name, options, part_data):
         self.name = name
         self.build_snaps = []
         self.stage_snaps = []
@@ -82,11 +82,11 @@ class PluginV1:
         with contextlib.suppress(AttributeError):
             self.stage_snaps = options.stage_snaps.copy()
 
-        self.config = config
+        self.part_data = part_data
         self.options = options
 
-        if config:
-            self.partdir = os.path.join(config.parts_dir, name)
+        if part_data:
+            self.partdir = os.path.join(part_data.parts_dir, name)
         else:
             self.partdir = os.path.join(os.getcwd(), "parts", name)
 
@@ -175,7 +175,7 @@ class PluginV1:
         if getattr(self.options, "disable_parallel", False):
             return 1
         else:
-            return self.config._parallel_build_count
+            return self.part_data._parallel_build_count
 
     # Helpers
     def run(self, cmd, cwd=None, **kwargs):

@@ -74,6 +74,6 @@ class AutotoolsPlugin(PluginV2):
         return [
             "[ ! -f ./configure ] && autoreconf --install",
             self._get_configure_command(),
-            'make -j"${SNAPCRAFT_PARALLEL_BUILD_COUNT}"',
-            'make install DESTDIR="${SNAPCRAFT_PART_INSTALL}"',
+            "make -j{}".format(self.part_data.parallel_build_count),
+            'make install DESTDIR="{}"'.format(self.part_data.part_install_dir),
         ]

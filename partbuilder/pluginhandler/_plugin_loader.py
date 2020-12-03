@@ -67,7 +67,7 @@ def load_plugin(
         options = _make_options(
             part_name, part_schema, definitions_schema, properties, plugin_schema
         )
-        plugin = plugin_class(part_name=part_name, options=options)
+        plugin = plugin_class(part_name=part_name, part_data=config, options=options)
     else:
         plugin_schema = plugin_class.schema()
         _validate_pull_and_build_properties(

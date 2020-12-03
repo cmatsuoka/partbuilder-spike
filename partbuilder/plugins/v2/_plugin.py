@@ -24,13 +24,14 @@ class PluginV2(abc.ABC):
     def get_schema(cls) -> Dict[str, Any]:
         """Return a jsonschema compatible dictionary for the plugin properties."""
 
-    def __init__(self, *, part_name: str, options) -> None:
+    def __init__(self, *, part_name: str, options, part_data) -> None:
         """
         :param str part_name: part names
         :param options: an object representing part defined properties.
         """
         self.name = part_name
         self.options = options
+        self.part_data = part_data
 
     @abc.abstractmethod
     def get_build_snaps(self) -> Set[str]:
