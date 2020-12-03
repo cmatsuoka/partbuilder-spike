@@ -22,4 +22,9 @@ parts:
 
   banner:
     plugin: customv2
+    build-environment:
+      - SNAPCRAFT_ARCH_TRIPLET: my-custom-triplet
     message: Building (v2)...
+    override-build: |
+      echo "--- $SNAPCRAFT_ARCH_TRIPLET ---"
+      snapcraftctl build
