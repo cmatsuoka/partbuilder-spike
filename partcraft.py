@@ -5,9 +5,12 @@ import yaml
 import os
 from typing import Dict, List, Set
 
-from partbuilder import PluginV1, PluginV2
+import partbuilder
 
 def run(name, version, file_name):
+    partbuilder.register_plugins({"customv2": CustomPluginV2})
+    partbuilder.register_pre_step_callback(set_part_environment)
+
     with open(file_name) as f:
         parts = yaml.safe_load(f)
 
@@ -23,7 +26,6 @@ def run(name, version, file_name):
     lm.prime()
 
 
-@partbuilder.pre_step
 def set_part_environment(config: partbuilder.PartData):
     # mimic the part environment set by snapcraft
     env = {
@@ -46,32 +48,7 @@ def set_part_environment(config: partbuilder.PartData):
         os.environ[key] = value
 
 
-@partbuilder.plugin(name="custom")
-class CustomPluginV2(PluginV1):
-    @classmethod
-    def schema(cls):
-        schema = super().schema()
-        schema["properties"]["message"] = {"type": "string"}
-        schema["required"] = ["message"]
-        return schema
-
-    @classmethod
-    def get_build_properties(cls):
-        # Inform Snapcraft of the properties associated with building. If these
-        # change in the YAML Snapcraft will consider the build step dirty.
-        return ["message"]
-
-    def __init__(self, name, options, config):
-        super().__init__(name, options, config)
-        self.build_packages.append("figlet")
-
-    def build(self):
-        super().build()
-        command = ["figlet", "-f", "small", self.options.message]
-        self.run(command)
-
-@partbuilder.plugin(name="customv2")
-class CustomPluginV2(PluginV2):
+class CustomPluginV2(partbuilder.PluginV2):
     @classmethod
     def get_schema(cls):
         return {

@@ -19,10 +19,9 @@ from partbuilder.plugins.v1 import PluginV1 as BasePlugin  # noqa: F401
 from ._partbuilder import PartData  # noqa: F401
 from ._partbuilder import LifecycleManager  # noqa: F401
 
-from .plugins.v1 import PluginV1  # noqa: F401
 from .plugins.v2 import PluginV2  # noqa: F401
 
-# decorators
-from ._partbuilder import pre_step   # noqa: F401
-from ._partbuilder import post_step  # noqa: F401
-from ._partbuilder import plugin     # noqa: F401
+from ._partbuilder import Plugin  # noqa: F401
+from ._partbuilder import register_pre_step_callback   # noqa: F401
+from ._partbuilder import register_post_step_callback  # noqa: F401
+from ._partbuilder import register_plugins             # noqa: F401

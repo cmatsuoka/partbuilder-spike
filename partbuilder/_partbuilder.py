@@ -18,7 +18,7 @@ from collections import ChainMap
 import logging
 import platform
 import os
-from typing import TYPE_CHECKING, cast, Union, Dict, List, Set, Any  # noqa: F401
+from typing import TYPE_CHECKING, cast, Type, Union, Dict, List, Set, Any  # noqa: F401
 
 from partbuilder import lifecycle
 from partbuilder._schema import Validator
@@ -512,22 +512,23 @@ class LifecycleManager:
         return state
 
 
-# decorators
+# We only have V2 now, will be Union[] later
+Plugin = Type[plugins.v2.PluginV2]
 
-def pre_step(func):
+# FIXME:SPIKE: handle steps list
+def register_pre_step_callback(func, steps: List[str]=[]):
     _pre_hooks.append(func)
     return func
 
 
-def post_step(func):
+# FIXME:SPIKE: handle steps list
+def register_post_step_callback(func, steps: List[str]=[]):
     _post_hooks.append(func)
     return func
 
 
-def plugin(name: str):
-    def decorate(class_):
-        _custom_plugins.update({name: class_})
-    return decorate
+def register_plugins(plugins: Dict[str, Plugin]):
+    _custom_plugins.update(plugins)
 
 
 def _get_platform_architecture():
